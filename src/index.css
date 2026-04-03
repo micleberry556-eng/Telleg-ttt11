@@ -1,0 +1,55 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 210 15% 7%; --foreground: 210 20% 92%;
+    --card: 210 14% 10%; --card-foreground: 210 20% 92%;
+    --popover: 210 14% 12%; --popover-foreground: 210 20% 92%;
+    --primary: 210 100% 52%; --primary-foreground: 0 0% 100%;
+    --secondary: 210 14% 14%; --secondary-foreground: 210 20% 80%;
+    --muted: 210 12% 16%; --muted-foreground: 210 15% 55%;
+    --accent: 210 100% 52%; --accent-foreground: 0 0% 100%;
+    --destructive: 0 72% 51%; --destructive-foreground: 0 0% 100%;
+    --border: 210 12% 18%; --input: 210 12% 18%; --ring: 210 100% 52%;
+    --radius: 0.75rem;
+    --sidebar-background: 210 15% 8%; --sidebar-foreground: 210 20% 85%;
+    --sidebar-primary: 210 100% 52%; --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 210 14% 14%; --sidebar-accent-foreground: 210 20% 92%;
+    --sidebar-border: 210 12% 15%; --sidebar-ring: 210 100% 52%;
+    --chat-bg: 210 15% 9%;
+    --chat-bubble-own: 210 100% 52%; --chat-bubble-own-foreground: 0 0% 100%;
+    --chat-bubble-other: 210 14% 16%; --chat-bubble-other-foreground: 210 20% 90%;
+    --online: 142 70% 45%;
+    --chat-hover: 210 14% 13%; --chat-active: 210 100% 52%; --chat-active-foreground: 0 0% 100%;
+    --admin-accent: 262 83% 58%; --admin-accent-foreground: 0 0% 100%;
+    --success: 142 70% 45%; --warning: 38 92% 50%;
+  }
+}
+
+@layer base {
+  * { @apply border-border; }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: hsl(var(--muted)); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: hsl(var(--muted-foreground)); }
+}
+
+@layer utilities {
+  .chat-bubble-own {
+    @apply bg-primary text-primary-foreground;
+    border-radius: 18px 18px 4px 18px;
+  }
+  .chat-bubble-other {
+    background: hsl(var(--chat-bubble-other));
+    color: hsl(var(--chat-bubble-other-foreground));
+    border-radius: 18px 18px 18px 4px;
+  }
+}
