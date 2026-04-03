@@ -1,6 +1,31 @@
-export interface User { id: string; name: string; online: boolean; lastSeen?: string; avatar?: string; }
-export interface Message { id: string; chatId: string; senderId: string; text: string; timestamp: string; read: boolean; }
-export interface Chat { id: string; type: 'private' | 'group'; name?: string; participants: string[]; lastMessage?: { text: string; timestamp: string; senderId: string; }; unreadCount: number; }
+export interface User {
+  id: string;
+  name: string;
+  online: boolean;
+  lastSeen?: string;
+  avatar?: string;
+}
+
+export interface Message {
+  id: string;
+  chatId: string;
+  senderId: string;
+  text: string;
+  timestamp: string;
+  read: boolean;
+}
+
+export interface Chat {
+  id: string;
+  type: 'private' | 'group';
+  name?: string;
+  description?: string;
+  participants: string[];
+  lastMessage?: { text: string; timestamp: string; senderId: string };
+  unreadCount: number;
+  createdAt?: string;
+  createdBy?: string;
+}
 
 export const users: User[] = [
   { id: 'me', name: 'Я', online: true },
@@ -15,9 +40,9 @@ export const users: User[] = [
 export const chats: Chat[] = [
   { id: 'chat1', type: 'private', participants: ['me', 'user1'], lastMessage: { text: 'Привет! Как дела?', timestamp: '14:30', senderId: 'user1' }, unreadCount: 2 },
   { id: 'chat2', type: 'private', participants: ['me', 'user2'], lastMessage: { text: 'Увидимся завтра!', timestamp: '13:15', senderId: 'me' }, unreadCount: 0 },
-  { id: 'chat3', type: 'group', name: 'Рабочий чат', participants: ['me', 'user1', 'user3', 'user5'], lastMessage: { text: 'Встреча в 15:00', timestamp: '12:00', senderId: 'user3' }, unreadCount: 5 },
+  { id: 'chat3', type: 'group', name: 'Рабочий чат', description: 'Обсуждение рабочих вопросов и задач команды', participants: ['me', 'user1', 'user3', 'user5'], lastMessage: { text: 'Встреча в 15:00', timestamp: '12:00', senderId: 'user3' }, unreadCount: 5, createdAt: '01.03.2025', createdBy: 'me' },
   { id: 'chat4', type: 'private', participants: ['me', 'user4'], lastMessage: { text: 'Спасибо за помощь!', timestamp: '11:30', senderId: 'user4' }, unreadCount: 1 },
-  { id: 'chat5', type: 'group', name: 'Друзья', participants: ['me', 'user2', 'user4', 'user6'], lastMessage: { text: 'Кто идёт на выходных?', timestamp: '10:45', senderId: 'user6' }, unreadCount: 3 },
+  { id: 'chat5', type: 'group', name: 'Друзья', description: 'Планируем встречи и делимся новостями', participants: ['me', 'user2', 'user4', 'user6'], lastMessage: { text: 'Кто идёт на выходных?', timestamp: '10:45', senderId: 'user6' }, unreadCount: 3, createdAt: '15.01.2025', createdBy: 'user2' },
   { id: 'chat6', type: 'private', participants: ['me', 'user5'], lastMessage: { text: 'Отправил документы', timestamp: '09:20', senderId: 'me' }, unreadCount: 0 },
 ];
 
