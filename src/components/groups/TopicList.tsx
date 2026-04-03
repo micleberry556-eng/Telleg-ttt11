@@ -1,4 +1,4 @@
-import { ArrowLeft, Plus, Hash, MessageSquare } from 'lucide-react';
+import { ArrowLeft, Plus, Hash, MessageSquare, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { users, type Topic } from '@/data/mockData';
 import { motion } from 'framer-motion';
@@ -10,6 +10,7 @@ interface TopicListProps {
   onSelectTopic: (topicId: string) => void;
   onCreateTopic: () => void;
   onBack: () => void;
+  onOpenGroupInfo: () => void;
 }
 
 export function TopicList({
@@ -19,6 +20,7 @@ export function TopicList({
   onSelectTopic,
   onCreateTopic,
   onBack,
+  onOpenGroupInfo,
 }: TopicListProps) {
   return (
     <div className="flex flex-col h-full bg-card border-r border-border">
@@ -34,6 +36,13 @@ export function TopicList({
           <h2 className="text-sm font-semibold text-foreground truncate">{groupName}</h2>
           <p className="text-xs text-muted-foreground">Темы</p>
         </div>
+        <button
+          onClick={onOpenGroupInfo}
+          className="p-2 rounded-lg hover:bg-muted transition-colors"
+          title="Информация о группе"
+        >
+          <Info className="w-5 h-5 text-muted-foreground" />
+        </button>
       </div>
 
       {/* Create topic button */}

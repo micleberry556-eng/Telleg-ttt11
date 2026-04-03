@@ -7,7 +7,7 @@ import { motion } from 'framer-motion';
 const RESEND_COOLDOWN = 60;
 
 export function CodeStep() {
-  const { phone, verifyCode, resendCode, loading, error } = useAuth();
+  const { phone, verifyCode, resendCode, goBack, loading, error } = useAuth();
   const [code, setCode] = useState(['', '', '', '']);
   const [cooldown, setCooldown] = useState(RESEND_COOLDOWN);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -88,7 +88,7 @@ export function CodeStep() {
       >
         {/* Back button */}
         <button
-          onClick={() => window.location.reload()}
+          onClick={goBack}
           className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6"
         >
           <ArrowLeft className="w-4 h-4" />

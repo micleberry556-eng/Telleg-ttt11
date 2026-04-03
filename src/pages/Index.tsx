@@ -51,8 +51,10 @@ const Index = () => {
   const [topicMessages, setTopicMessages] = useState<Record<string, Message[]>>(defaultTopicMessages);
   const isMobile = useIsMobile();
 
-  const showSidebar = !isMobile || (!activeChatId && !activeChannelId);
-  const showContent = !isMobile || !!activeChatId || !!activeChannelId;
+  // On mobile: show sidebar when nothing is actively open, OR when viewing topic list (group selected but no topic).
+  const isInTopicList = view === 'topics' && activeChatId && !activeTopicId;
+  const showSidebar = !isMobile || ((!activeChatId && !activeChannelId) || !!isInTopicList);
+  const showContent = !isMobile || ((!!activeChatId || !!activeChannelId) && !isInTopicList);
 
   const allChats = [...defaultChats, ...createdGroups];
   const activeChat = activeChatId ? allChats.find(c => c.id === activeChatId) : null;
@@ -199,6 +201,7 @@ const Index = () => {
             setActiveTopicId(null);
             setView('chat');
           }}
+          onOpenGroupInfo={() => setView('group-info')}
         />
       );
     }
