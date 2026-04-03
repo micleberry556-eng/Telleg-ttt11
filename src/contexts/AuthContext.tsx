@@ -37,6 +37,8 @@ interface AuthContextValue {
   logout: () => void;
   /** Resend the SMS code (simulated). */
   resendCode: () => Promise<void>;
+  /** Go back to the previous auth step. */
+  goBack: () => void;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -147,9 +149,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setLoading(false);
   };
 
+  const goBack = () => {
+    setError(null);
+    if (step === 'code') {
+      setStep('phone');
+      setPhone('');
+    } else if (step === 'profile') {
+      setStep('code');
+    }
+  };
+
   return (
     <AuthContext.Provider
-      value={{ user, step, phone, loading, error, submitPhone, verifyCode, setProfileName, logout, resendCode }}
+      value={{ user, step, phone, loading, error, submitPhone, verifyCode, setProfileName, logout, resendCode, goBack }}
     >
       {children}
     </AuthContext.Provider>
