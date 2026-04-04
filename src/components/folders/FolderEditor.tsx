@@ -1,12 +1,17 @@
 import { useState, type FormEvent } from 'react';
-import { ArrowLeft, Check } from 'lucide-react';
+import { ArrowLeft, Check, Search, Users, Megaphone, MessageCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { type ChatFolder } from '@/data/mockData';
+import { Avatar } from '@/components/messenger/Avatar';
+import { users, type ChatFolder, type Chat, type Channel } from '@/data/mockData';
 import { motion } from 'framer-motion';
 
 interface FolderEditorProps {
   /** Pass an existing folder to edit, or undefined to create a new one. */
   folder?: ChatFolder;
+  /** All available chats (private + group). */
+  availableChats: Chat[];
+  /** All available channels. */
+  availableChannels: Channel[];
   onBack: () => void;
   onSave: (folder: ChatFolder) => void;
 }
@@ -14,20 +19,47 @@ interface FolderEditorProps {
 const ICON_OPTIONS = ['📁', '👤', '👥', '📢', '💼', '🏠', '⭐', '🔖', '🤖', '🎮', '📚', '🎵', '✈️', '🛒', '❤️', '🔔'];
 
 const TYPE_OPTIONS: { key: 'private' | 'group'; label: string; icon: string }[] = [
-  { key: 'private', label: 'Личные чаты', icon: '👤' },
-  { key: 'group', label: 'Группы', icon: '👥' },
+  { key: 'private', label: 'Все личные чаты', icon: '👤' },
+  { key: 'group', label: 'Все группы', icon: '👥' },
 ];
 
-export function FolderEditor({ folder, onBack, onSave }: FolderEditorProps) {
+function getChatName(chat: Chat) {
+  if (chat.name) return chat.name;
+  const other = chat.participants.find(p => p !== 'me');
+  return users.find(u => u.id === other)?.name ?? 'Unknown';
+}
+
+export function FolderEditor({ folder, availableChats, availableChannels, onBack, onSave }: FolderEditorProps) {
   const isEditing = !!folder;
   const [name, setName] = useState(folder?.name || '');
   const [icon, setIcon] = useState(folder?.icon || '📁');
   const [includeTypes, setIncludeTypes] = useState<('private' | 'group')[]>(folder?.includeTypes || []);
   const [includeChannels, setIncludeChannels] = useState(folder?.includeChannels || false);
+  const [includeChatIds, setIncludeChatIds] = useState<string[]>(folder?.includeChatIds || []);
+  const [includeChannelIds, setIncludeChannelIds] = useState<string[]>(() => {
+    // Extract channel IDs from includeChatIds (they start with 'ch').
+    return (folder?.includeChatIds || []).filter(id => id.startsWith('ch'));
+  });
+  const [pickerSearch, setPickerSearch] = useState('');
+
+  // Separate chat IDs from channel IDs in includeChatIds.
+  const chatOnlyIds = includeChatIds.filter(id => !id.startsWith('ch'));
 
   const toggleType = (type: 'private' | 'group') => {
     setIncludeTypes(prev =>
       prev.includes(type) ? prev.filter(t => t !== type) : [...prev, type],
+    );
+  };
+
+  const toggleChat = (chatId: string) => {
+    setIncludeChatIds(prev =>
+      prev.includes(chatId) ? prev.filter(id => id !== chatId) : [...prev, chatId],
+    );
+  };
+
+  const toggleChannel = (channelId: string) => {
+    setIncludeChannelIds(prev =>
+      prev.includes(channelId) ? prev.filter(id => id !== channelId) : [...prev, channelId],
     );
   };
 
@@ -41,18 +73,22 @@ export function FolderEditor({ folder, onBack, onSave }: FolderEditorProps) {
       icon,
       includeTypes,
       includeChannels,
-      includeChatIds: folder?.includeChatIds || [],
+      includeChatIds: [...chatOnlyIds, ...includeChannelIds],
       excludeChatIds: folder?.excludeChatIds || [],
     });
   };
 
   const isValid = name.trim().length >= 1;
-  const hasChanges = !isEditing || (
-    name.trim() !== folder.name ||
-    icon !== folder.icon ||
-    JSON.stringify(includeTypes) !== JSON.stringify(folder.includeTypes) ||
-    includeChannels !== folder.includeChannels
+
+  // Filter available items by search.
+  const filteredChats = availableChats.filter(c =>
+    getChatName(c).toLowerCase().includes(pickerSearch.toLowerCase()),
   );
+  const filteredChannels = availableChannels.filter(c =>
+    c.name.toLowerCase().includes(pickerSearch.toLowerCase()),
+  );
+
+  const selectedCount = chatOnlyIds.length + includeChannelIds.length;
 
   return (
     <motion.div
@@ -108,15 +144,14 @@ export function FolderEditor({ folder, onBack, onSave }: FolderEditorProps) {
               value={name}
               onChange={e => setName(e.target.value)}
               placeholder="Например: Работа"
-              autoFocus
               maxLength={30}
               className="w-full bg-muted rounded-xl px-4 py-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring text-sm"
             />
           </div>
 
-          {/* Include types */}
+          {/* Include by type */}
           <div>
-            <label className="block text-sm font-medium text-foreground mb-2">Включить в папку</label>
+            <label className="block text-sm font-medium text-foreground mb-2">Фильтр по типу</label>
             <div className="space-y-2">
               {TYPE_OPTIONS.map(opt => {
                 const isSelected = includeTypes.includes(opt.key);
@@ -143,8 +178,6 @@ export function FolderEditor({ folder, onBack, onSave }: FolderEditorProps) {
                   </button>
                 );
               })}
-
-              {/* Channels toggle */}
               <button
                 type="button"
                 onClick={() => setIncludeChannels(!includeChannels)}
@@ -155,7 +188,7 @@ export function FolderEditor({ folder, onBack, onSave }: FolderEditorProps) {
               >
                 <span className="text-lg">📢</span>
                 <span className={cn('text-sm flex-1', includeChannels ? 'text-primary font-medium' : 'text-foreground')}>
-                  Каналы
+                  Все каналы
                 </span>
                 <div className={cn(
                   'w-5 h-5 rounded border-2 flex items-center justify-center transition-colors',
@@ -167,10 +200,115 @@ export function FolderEditor({ folder, onBack, onSave }: FolderEditorProps) {
             </div>
           </div>
 
+          {/* ── Specific chats/channels picker ── */}
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-2">
+              Добавить конкретные чаты
+              {selectedCount > 0 && (
+                <span className="ml-1.5 text-xs text-primary font-normal">({selectedCount} выбрано)</span>
+              )}
+            </label>
+
+            {/* Search */}
+            <div className="relative mb-3">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <input
+                type="text"
+                value={pickerSearch}
+                onChange={e => setPickerSearch(e.target.value)}
+                placeholder="Поиск чатов и каналов..."
+                className="w-full bg-muted rounded-lg pl-9 pr-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+              />
+            </div>
+
+            <div className="space-y-1 max-h-64 overflow-y-auto rounded-xl border border-border">
+              {/* Chats */}
+              {filteredChats.length > 0 && (
+                <div className="px-3 pt-2 pb-1">
+                  <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Чаты и группы</p>
+                </div>
+              )}
+              {filteredChats.map(chat => {
+                const chatName = getChatName(chat);
+                const isGroup = chat.type === 'group';
+                const isSelected = chatOnlyIds.includes(chat.id);
+                return (
+                  <button
+                    key={chat.id}
+                    type="button"
+                    onClick={() => toggleChat(chat.id)}
+                    className={cn(
+                      'w-full flex items-center gap-2.5 px-3 py-2 transition-colors text-left',
+                      isSelected ? 'bg-primary/5' : 'hover:bg-muted/50',
+                    )}
+                  >
+                    {isGroup ? (
+                      <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                        <Users className="w-4 h-4 text-primary" />
+                      </div>
+                    ) : (
+                      <Avatar name={chatName} size="sm" />
+                    )}
+                    <span className={cn('text-sm flex-1 truncate', isSelected ? 'text-primary font-medium' : 'text-foreground')}>
+                      {chatName}
+                    </span>
+                    <div className={cn(
+                      'w-4.5 h-4.5 rounded border-2 flex items-center justify-center transition-colors flex-shrink-0',
+                      isSelected ? 'bg-primary border-primary' : 'border-muted-foreground/30',
+                    )}>
+                      {isSelected && <Check className="w-2.5 h-2.5 text-primary-foreground" />}
+                    </div>
+                  </button>
+                );
+              })}
+
+              {/* Channels */}
+              {filteredChannels.length > 0 && (
+                <div className="px-3 pt-2 pb-1">
+                  <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Каналы</p>
+                </div>
+              )}
+              {filteredChannels.map(ch => {
+                const isSelected = includeChannelIds.includes(ch.id);
+                return (
+                  <button
+                    key={ch.id}
+                    type="button"
+                    onClick={() => toggleChannel(ch.id)}
+                    className={cn(
+                      'w-full flex items-center gap-2.5 px-3 py-2 transition-colors text-left',
+                      isSelected ? 'bg-primary/5' : 'hover:bg-muted/50',
+                    )}
+                  >
+                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <Megaphone className="w-4 h-4 text-primary" />
+                    </div>
+                    <span className={cn('text-sm flex-1 truncate', isSelected ? 'text-primary font-medium' : 'text-foreground')}>
+                      {ch.name}
+                    </span>
+                    <div className={cn(
+                      'w-4.5 h-4.5 rounded border-2 flex items-center justify-center transition-colors flex-shrink-0',
+                      isSelected ? 'bg-primary border-primary' : 'border-muted-foreground/30',
+                    )}>
+                      {isSelected && <Check className="w-2.5 h-2.5 text-primary-foreground" />}
+                    </div>
+                  </button>
+                );
+              })}
+
+              {filteredChats.length === 0 && filteredChannels.length === 0 && (
+                <div className="flex flex-col items-center justify-center py-6 text-muted-foreground">
+                  <MessageCircle className="w-6 h-6 mb-1 opacity-50" />
+                  <p className="text-xs">Ничего не найдено</p>
+                </div>
+              )}
+            </div>
+          </div>
+
           {/* Submit */}
           <button
             type="submit"
-            disabled={!isValid || (isEditing && !hasChanges)}
+            disabled={!isValid}
             className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground rounded-xl py-3 text-sm font-medium transition-colors hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Check className="w-4 h-4" />
