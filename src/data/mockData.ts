@@ -6,6 +6,63 @@ export interface User {
   avatar?: string;
 }
 
+/* ── Stories ── */
+
+export type StoryContentType = 'text' | 'image' | 'video';
+
+export interface StoryItem {
+  id: string;
+  type: StoryContentType;
+  /** Text content or media URL. */
+  content: string;
+  /** Background color for text stories. */
+  bgColor?: string;
+  timestamp: string;
+  /** Duration in seconds for auto-advance. */
+  duration: number;
+}
+
+export interface UserStory {
+  userId: string;
+  items: StoryItem[];
+  /** IDs of story items the current user has viewed. */
+  viewedIds: string[];
+}
+
+export const defaultStories: UserStory[] = [
+  {
+    userId: 'user1',
+    items: [
+      { id: 'st1', type: 'text', content: 'Сегодня отличный день! ☀️', bgColor: 'from-blue-500 to-purple-600', timestamp: '2 ч назад', duration: 5 },
+      { id: 'st2', type: 'image', content: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&h=900&fit=crop', timestamp: '1 ч назад', duration: 5 },
+    ],
+    viewedIds: [],
+  },
+  {
+    userId: 'user3',
+    items: [
+      { id: 'st3', type: 'image', content: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=600&h=900&fit=crop', timestamp: '3 ч назад', duration: 5 },
+    ],
+    viewedIds: [],
+  },
+  {
+    userId: 'user5',
+    items: [
+      { id: 'st4', type: 'text', content: 'Работаю над новым проектом 🚀', bgColor: 'from-green-500 to-teal-600', timestamp: '30 мин назад', duration: 5 },
+      { id: 'st5', type: 'text', content: 'Кто хочет присоединиться?', bgColor: 'from-orange-500 to-red-500', timestamp: '25 мин назад', duration: 5 },
+      { id: 'st6', type: 'image', content: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=600&h=900&fit=crop', timestamp: '20 мин назад', duration: 5 },
+    ],
+    viewedIds: [],
+  },
+  {
+    userId: 'user2',
+    items: [
+      { id: 'st7', type: 'image', content: 'https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?w=600&h=900&fit=crop', timestamp: '5 ч назад', duration: 5 },
+    ],
+    viewedIds: ['st7'],
+  },
+];
+
 /* ── Chat Folders ── */
 
 export interface ChatFolder {
