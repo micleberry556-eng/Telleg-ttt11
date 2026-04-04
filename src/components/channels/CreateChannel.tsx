@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { ArrowLeft, Check, Megaphone } from 'lucide-react';
-import { type Channel } from '@/data/mockData';
+import { type Channel, DEFAULT_CHANNEL_PRIVACY } from '@/data/mockData';
 import { motion } from 'framer-motion';
 
 interface CreateChannelProps {
@@ -25,6 +25,7 @@ export function CreateChannel({ onBack, onCreated }: CreateChannelProps) {
       createdBy: 'me',
       subscribed: true,
       isOwner: true,
+      privacy: { ...DEFAULT_CHANNEL_PRIVACY },
     };
 
     onCreated(newChannel);

@@ -13,6 +13,7 @@ import { ChannelFeed } from '@/components/channels/ChannelFeed';
 import { CreateChannel } from '@/components/channels/CreateChannel';
 import { ChannelInfo } from '@/components/channels/ChannelInfo';
 import { CreatePost } from '@/components/channels/CreatePost';
+import { ChannelPrivacyPage } from '@/components/channels/ChannelPrivacyPage';
 import { PrivacySettingsPage } from '@/components/settings/PrivacySettings';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useAuth } from '@/contexts/AuthContext';
@@ -25,6 +26,7 @@ import {
   type Chat,
   type Channel,
   type ChannelPost,
+  type ChannelPrivacy,
   type Topic,
   type Message,
 } from '@/data/mockData';
@@ -42,6 +44,7 @@ type View =
   | 'edit-topic'
   | 'create-channel'
   | 'channel-info'
+  | 'channel-privacy'
   | 'create-post';
 
 const Index = () => {
@@ -202,6 +205,12 @@ const Index = () => {
     setView('chat');
   };
 
+  const handleChannelPrivacyChange = (channelId: string, newPrivacy: ChannelPrivacy) => {
+    setChannels(prev =>
+      prev.map(ch => (ch.id === channelId ? { ...ch, privacy: newPrivacy } : ch)),
+    );
+  };
+
   const handleBack = () => {
     if (activeTopicId) {
       setActiveTopicId(null);
@@ -353,6 +362,15 @@ const Index = () => {
             onBack={() => setView('chat')}
             onToggleSubscribe={handleToggleSubscribe}
             onDelete={activeChannel.isOwner ? handleDeleteChannel : undefined}
+            onOpenPrivacy={activeChannel.isOwner ? () => setView('channel-privacy') : undefined}
+          />
+        )}
+        {view === 'channel-privacy' && activeChannel && activeChannel.isOwner && (
+          <ChannelPrivacyPage
+            channelName={activeChannel.name}
+            privacy={activeChannel.privacy}
+            onBack={() => setView('channel-info')}
+            onChange={(p) => handleChannelPrivacyChange(activeChannel.id, p)}
           />
         )}
         {view === 'create-post' && activeChannelId && (
