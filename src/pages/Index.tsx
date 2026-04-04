@@ -17,6 +17,8 @@ import { CreatePost } from '@/components/channels/CreatePost';
 import { ChannelPrivacyPage } from '@/components/channels/ChannelPrivacyPage';
 import { PrivacySettingsPage } from '@/components/settings/PrivacySettings';
 import { AppearanceSettings } from '@/components/settings/AppearanceSettings';
+import { FolderManager } from '@/components/folders/FolderManager';
+import { FolderEditor } from '@/components/folders/FolderEditor';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -25,11 +27,13 @@ import {
   defaultChannelPosts,
   defaultTopics,
   defaultTopicMessages,
+  DEFAULT_FOLDERS,
   type Chat,
   type Channel,
   type ChannelPost,
   type ChannelPrivacy,
   type GroupPrivacy,
+  type ChatFolder,
   type Topic,
   type Message,
 } from '@/data/mockData';
@@ -50,7 +54,10 @@ type View =
   | 'create-channel'
   | 'channel-info'
   | 'channel-privacy'
-  | 'create-post';
+  | 'create-post'
+  | 'manage-folders'
+  | 'create-folder'
+  | 'edit-folder';
 
 const Index = () => {
   const { privacy, updatePrivacy, appearance, updateAppearance } = useAuth();
@@ -64,6 +71,8 @@ const Index = () => {
   const [channelPosts, setChannelPosts] = useState<Record<string, ChannelPost[]>>(defaultChannelPosts);
   const [topics, setTopics] = useState<Topic[]>(defaultTopics);
   const [topicMessages, setTopicMessages] = useState<Record<string, Message[]>>(defaultTopicMessages);
+  const [folders, setFolders] = useState<ChatFolder[]>(DEFAULT_FOLDERS);
+  const [editingFolderId, setEditingFolderId] = useState<string | null>(null);
   const isMobile = useIsMobile();
 
   // On mobile: show sidebar when nothing is actively open, OR when viewing topic list.
@@ -77,6 +86,7 @@ const Index = () => {
   const activeTopic = activeTopicId ? topics.find(t => t.id === activeTopicId) : null;
   const editingTopic = editingTopicId ? topics.find(t => t.id === editingTopicId) : null;
   const groupTopics = activeChatId ? topics.filter(t => t.groupId === activeChatId) : [];
+  const editingFolder = editingFolderId ? folders.find(f => f.id === editingFolderId) : null;
 
   /* ── Chat / Group handlers ── */
   const handleSelectChat = (chatId: string) => {
@@ -223,6 +233,26 @@ const Index = () => {
     );
   };
 
+  /* ── Folder handlers ── */
+  const handleFolderSaved = (folder: ChatFolder) => {
+    setFolders(prev => {
+      const exists = prev.find(f => f.id === folder.id);
+      if (exists) return prev.map(f => (f.id === folder.id ? folder : f));
+      return [...prev, folder];
+    });
+    setEditingFolderId(null);
+    setView('manage-folders');
+  };
+
+  const handleDeleteFolder = (folderId: string) => {
+    setFolders(prev => prev.filter(f => f.id !== folderId));
+  };
+
+  const handleEditFolder = (folderId: string) => {
+    setEditingFolderId(folderId);
+    setView('edit-folder');
+  };
+
   const handleBack = () => {
     if (activeTopicId) {
       setActiveTopicId(null);
@@ -264,8 +294,10 @@ const Index = () => {
         onOpenAdmin={() => setView('admin')}
         onCreateGroup={() => setView('create-group')}
         onCreateChannel={() => setView('create-channel')}
+        onManageFolders={() => setView('manage-folders')}
         extraChats={createdGroups}
         channels={channels}
+        folders={folders}
       />
     );
   };
@@ -403,6 +435,22 @@ const Index = () => {
         )}
         {view === 'create-post' && activeChannelId && (
           <CreatePost channelId={activeChannelId} onBack={() => setView('chat')} onCreated={handlePostCreated} />
+        )}
+        {view === 'manage-folders' && (
+          <FolderManager
+            folders={folders}
+            onBack={() => setView('chat')}
+            onCreateFolder={() => { setEditingFolderId(null); setView('create-folder'); }}
+            onEditFolder={handleEditFolder}
+            onDeleteFolder={handleDeleteFolder}
+          />
+        )}
+        {(view === 'create-folder' || view === 'edit-folder') && (
+          <FolderEditor
+            folder={editingFolder || undefined}
+            onBack={() => setView('manage-folders')}
+            onSave={handleFolderSaved}
+          />
         )}
       </AnimatePresence>
     </div>
