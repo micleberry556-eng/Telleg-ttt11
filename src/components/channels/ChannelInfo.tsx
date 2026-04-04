@@ -1,4 +1,4 @@
-import { ArrowLeft, Megaphone, Calendar, UserPlus, LogOut, Bell, BellOff } from 'lucide-react';
+import { ArrowLeft, Megaphone, Calendar, UserPlus, LogOut, Bell, BellOff, Shield, ChevronRight, Globe, Lock } from 'lucide-react';
 import { type Channel } from '@/data/mockData';
 import { motion } from 'framer-motion';
 
@@ -7,9 +7,13 @@ interface ChannelInfoProps {
   onBack: () => void;
   onToggleSubscribe: (channelId: string) => void;
   onDelete?: (channelId: string) => void;
+  onOpenPrivacy?: () => void;
 }
 
-export function ChannelInfo({ channel, onBack, onToggleSubscribe, onDelete }: ChannelInfoProps) {
+export function ChannelInfo({ channel, onBack, onToggleSubscribe, onDelete, onOpenPrivacy }: ChannelInfoProps) {
+  const VisIcon = channel.privacy.visibility === 'private' ? Lock : Globe;
+  const visLabel = channel.privacy.visibility === 'private' ? 'Приватный канал' : 'Публичный канал';
+
   return (
     <motion.div
       initial={{ x: '100%' }}
@@ -58,12 +62,38 @@ export function ChannelInfo({ channel, onBack, onToggleSubscribe, onDelete }: Ch
             <span className="text-sm text-foreground">Создан {channel.createdAt}</span>
           </div>
           <div className="flex items-center gap-2">
+            <VisIcon className="w-4 h-4 text-muted-foreground" />
+            <span className="text-sm text-foreground">{visLabel}</span>
+          </div>
+          <div className="flex items-center gap-2">
             <UserPlus className="w-4 h-4 text-muted-foreground" />
             <span className="text-sm text-foreground">
-              {channel.isOwner ? 'Создатель: Вы' : 'Публичный канал'}
+              {channel.isOwner ? 'Создатель: Вы' : 'Канал'}
             </span>
           </div>
         </div>
+
+        {/* Privacy settings button (owner only) */}
+        {channel.isOwner && onOpenPrivacy && (
+          <div className="mx-4 mb-4">
+            <button
+              onClick={onOpenPrivacy}
+              className="w-full flex items-center gap-3 bg-muted rounded-xl p-4 hover:bg-muted/80 transition-colors"
+            >
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                <Shield className="w-5 h-5 text-primary" />
+              </div>
+              <div className="flex-1 text-left">
+                <p className="text-sm font-medium text-foreground">Приватность канала</p>
+                <p className="text-xs text-muted-foreground">
+                  {channel.privacy.visibility === 'private' ? 'Приватный' : 'Публичный'}
+                  {!channel.privacy.allowForwarding ? ', без пересылки' : ''}
+                </p>
+              </div>
+              <ChevronRight className="w-4 h-4 text-muted-foreground" />
+            </button>
+          </div>
+        )}
 
         {/* Actions */}
         <div className="mx-4 mb-6 space-y-2">

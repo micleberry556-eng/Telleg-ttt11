@@ -60,6 +60,24 @@ export interface ChannelPost {
   views: number;
 }
 
+export type ChannelVisibility = 'public' | 'private';
+export type ChannelPermission = 'everyone' | 'subscribers' | 'nobody';
+
+export interface ChannelPrivacy {
+  visibility: ChannelVisibility;
+  comments: ChannelPermission;
+  showSubscribers: ChannelPermission;
+  allowForwarding: boolean;
+  inviteLink?: string;
+}
+
+export const DEFAULT_CHANNEL_PRIVACY: ChannelPrivacy = {
+  visibility: 'public',
+  comments: 'everyone',
+  showSubscribers: 'everyone',
+  allowForwarding: true,
+};
+
 export interface Channel {
   id: string;
   name: string;
@@ -71,6 +89,8 @@ export interface Channel {
   subscribed: boolean;
   /** Current user is the owner (can post). */
   isOwner: boolean;
+  /** Channel privacy settings. */
+  privacy: ChannelPrivacy;
 }
 
 /* ── Static data ── */
@@ -132,9 +152,9 @@ export const messages: Record<string, Message[]> = {
 /* ── Channels mock data ── */
 
 export const defaultChannels: Channel[] = [
-  { id: 'ch1', name: 'Новости технологий', description: 'Последние новости из мира IT, гаджетов и науки', subscriberCount: 12400, createdAt: '10.01.2025', createdBy: 'user1', subscribed: true, isOwner: false },
-  { id: 'ch2', name: 'Музыка дня', description: 'Ежедневные подборки треков разных жанров', subscriberCount: 8700, createdAt: '05.02.2025', createdBy: 'user2', subscribed: true, isOwner: false },
-  { id: 'ch3', name: 'Фото и путешествия', description: 'Красивые фотографии со всего мира', subscriberCount: 23100, createdAt: '20.12.2024', createdBy: 'user3', subscribed: false, isOwner: false },
+  { id: 'ch1', name: 'Новости технологий', description: 'Последние новости из мира IT, гаджетов и науки', subscriberCount: 12400, createdAt: '10.01.2025', createdBy: 'user1', subscribed: true, isOwner: false, privacy: { visibility: 'public', comments: 'everyone', showSubscribers: 'everyone', allowForwarding: true } },
+  { id: 'ch2', name: 'Музыка дня', description: 'Ежедневные подборки треков разных жанров', subscriberCount: 8700, createdAt: '05.02.2025', createdBy: 'user2', subscribed: true, isOwner: false, privacy: { visibility: 'public', comments: 'subscribers', showSubscribers: 'subscribers', allowForwarding: true } },
+  { id: 'ch3', name: 'Фото и путешествия', description: 'Красивые фотографии со всего мира', subscriberCount: 23100, createdAt: '20.12.2024', createdBy: 'user3', subscribed: false, isOwner: false, privacy: { visibility: 'public', comments: 'nobody', showSubscribers: 'everyone', allowForwarding: false } },
 ];
 
 export const defaultChannelPosts: Record<string, ChannelPost[]> = {
