@@ -6,11 +6,8 @@ import { users, type ChatFolder, type Chat, type Channel } from '@/data/mockData
 import { motion } from 'framer-motion';
 
 interface FolderEditorProps {
-  /** Pass an existing folder to edit, or undefined to create a new one. */
   folder?: ChatFolder;
-  /** All available chats (private + group). */
   availableChats: Chat[];
-  /** All available channels. */
   availableChannels: Channel[];
   onBack: () => void;
   onSave: (folder: ChatFolder) => void;
@@ -29,21 +26,40 @@ function getChatName(chat: Chat) {
   return users.find(u => u.id === other)?.name ?? 'Unknown';
 }
 
+/**
+ * Split a combined includeChatIds array into chat IDs and channel IDs
+ * using the actual available data as the source of truth.
+ */
+function splitIds(
+  combined: string[],
+  availableChannels: Channel[],
+): { chatIds: string[]; channelIds: string[] } {
+  const channelIdSet = new Set(availableChannels.map(c => c.id));
+  const chatIds: string[] = [];
+  const channelIds: string[] = [];
+  for (const id of combined) {
+    if (channelIdSet.has(id)) {
+      channelIds.push(id);
+    } else {
+      chatIds.push(id);
+    }
+  }
+  return { chatIds, channelIds };
+}
+
 export function FolderEditor({ folder, availableChats, availableChannels, onBack, onSave }: FolderEditorProps) {
   const isEditing = !!folder;
+
+  // Split the saved includeChatIds into chats vs channels using actual data.
+  const initial = splitIds(folder?.includeChatIds || [], availableChannels);
+
   const [name, setName] = useState(folder?.name || '');
   const [icon, setIcon] = useState(folder?.icon || '📁');
   const [includeTypes, setIncludeTypes] = useState<('private' | 'group')[]>(folder?.includeTypes || []);
-  const [includeChannels, setIncludeChannels] = useState(folder?.includeChannels || false);
-  const [includeChatIds, setIncludeChatIds] = useState<string[]>(folder?.includeChatIds || []);
-  const [includeChannelIds, setIncludeChannelIds] = useState<string[]>(() => {
-    // Extract channel IDs from includeChatIds (they start with 'ch').
-    return (folder?.includeChatIds || []).filter(id => id.startsWith('ch'));
-  });
+  const [includeChannelsAll, setIncludeChannelsAll] = useState(folder?.includeChannels || false);
+  const [selectedChatIds, setSelectedChatIds] = useState<string[]>(initial.chatIds);
+  const [selectedChannelIds, setSelectedChannelIds] = useState<string[]>(initial.channelIds);
   const [pickerSearch, setPickerSearch] = useState('');
-
-  // Separate chat IDs from channel IDs in includeChatIds.
-  const chatOnlyIds = includeChatIds.filter(id => !id.startsWith('ch'));
 
   const toggleType = (type: 'private' | 'group') => {
     setIncludeTypes(prev =>
@@ -52,13 +68,13 @@ export function FolderEditor({ folder, availableChats, availableChannels, onBack
   };
 
   const toggleChat = (chatId: string) => {
-    setIncludeChatIds(prev =>
+    setSelectedChatIds(prev =>
       prev.includes(chatId) ? prev.filter(id => id !== chatId) : [...prev, chatId],
     );
   };
 
   const toggleChannel = (channelId: string) => {
-    setIncludeChannelIds(prev =>
+    setSelectedChannelIds(prev =>
       prev.includes(channelId) ? prev.filter(id => id !== channelId) : [...prev, channelId],
     );
   };
@@ -72,15 +88,15 @@ export function FolderEditor({ folder, availableChats, availableChannels, onBack
       name: name.trim(),
       icon,
       includeTypes,
-      includeChannels,
-      includeChatIds: [...chatOnlyIds, ...includeChannelIds],
+      includeChannels: includeChannelsAll,
+      // Merge chat IDs and channel IDs into a single array for storage.
+      includeChatIds: [...selectedChatIds, ...selectedChannelIds],
       excludeChatIds: folder?.excludeChatIds || [],
     });
   };
 
   const isValid = name.trim().length >= 1;
 
-  // Filter available items by search.
   const filteredChats = availableChats.filter(c =>
     getChatName(c).toLowerCase().includes(pickerSearch.toLowerCase()),
   );
@@ -88,7 +104,7 @@ export function FolderEditor({ folder, availableChats, availableChannels, onBack
     c.name.toLowerCase().includes(pickerSearch.toLowerCase()),
   );
 
-  const selectedCount = chatOnlyIds.length + includeChannelIds.length;
+  const selectedCount = selectedChatIds.length + selectedChannelIds.length;
 
   return (
     <motion.div
@@ -180,21 +196,21 @@ export function FolderEditor({ folder, availableChats, availableChannels, onBack
               })}
               <button
                 type="button"
-                onClick={() => setIncludeChannels(!includeChannels)}
+                onClick={() => setIncludeChannelsAll(!includeChannelsAll)}
                 className={cn(
                   'w-full flex items-center gap-3 px-4 py-3 rounded-xl border transition-all text-left',
-                  includeChannels ? 'border-primary bg-primary/5' : 'border-border hover:bg-muted/50',
+                  includeChannelsAll ? 'border-primary bg-primary/5' : 'border-border hover:bg-muted/50',
                 )}
               >
                 <span className="text-lg">📢</span>
-                <span className={cn('text-sm flex-1', includeChannels ? 'text-primary font-medium' : 'text-foreground')}>
+                <span className={cn('text-sm flex-1', includeChannelsAll ? 'text-primary font-medium' : 'text-foreground')}>
                   Все каналы
                 </span>
                 <div className={cn(
                   'w-5 h-5 rounded border-2 flex items-center justify-center transition-colors',
-                  includeChannels ? 'bg-primary border-primary' : 'border-muted-foreground/30',
+                  includeChannelsAll ? 'bg-primary border-primary' : 'border-muted-foreground/30',
                 )}>
-                  {includeChannels && <Check className="w-3 h-3 text-primary-foreground" />}
+                  {includeChannelsAll && <Check className="w-3 h-3 text-primary-foreground" />}
                 </div>
               </button>
             </div>
@@ -209,7 +225,6 @@ export function FolderEditor({ folder, availableChats, availableChannels, onBack
               )}
             </label>
 
-            {/* Search */}
             <div className="relative mb-3">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <input
@@ -231,7 +246,7 @@ export function FolderEditor({ folder, availableChats, availableChannels, onBack
               {filteredChats.map(chat => {
                 const chatName = getChatName(chat);
                 const isGroup = chat.type === 'group';
-                const isSelected = chatOnlyIds.includes(chat.id);
+                const isSelected = selectedChatIds.includes(chat.id);
                 return (
                   <button
                     key={chat.id}
@@ -253,10 +268,10 @@ export function FolderEditor({ folder, availableChats, availableChannels, onBack
                       {chatName}
                     </span>
                     <div className={cn(
-                      'w-4.5 h-4.5 rounded border-2 flex items-center justify-center transition-colors flex-shrink-0',
+                      'w-5 h-5 rounded border-2 flex items-center justify-center transition-colors flex-shrink-0',
                       isSelected ? 'bg-primary border-primary' : 'border-muted-foreground/30',
                     )}>
-                      {isSelected && <Check className="w-2.5 h-2.5 text-primary-foreground" />}
+                      {isSelected && <Check className="w-3 h-3 text-primary-foreground" />}
                     </div>
                   </button>
                 );
@@ -269,7 +284,7 @@ export function FolderEditor({ folder, availableChats, availableChannels, onBack
                 </div>
               )}
               {filteredChannels.map(ch => {
-                const isSelected = includeChannelIds.includes(ch.id);
+                const isSelected = selectedChannelIds.includes(ch.id);
                 return (
                   <button
                     key={ch.id}
@@ -287,10 +302,10 @@ export function FolderEditor({ folder, availableChats, availableChannels, onBack
                       {ch.name}
                     </span>
                     <div className={cn(
-                      'w-4.5 h-4.5 rounded border-2 flex items-center justify-center transition-colors flex-shrink-0',
+                      'w-5 h-5 rounded border-2 flex items-center justify-center transition-colors flex-shrink-0',
                       isSelected ? 'bg-primary border-primary' : 'border-muted-foreground/30',
                     )}>
-                      {isSelected && <Check className="w-2.5 h-2.5 text-primary-foreground" />}
+                      {isSelected && <Check className="w-3 h-3 text-primary-foreground" />}
                     </div>
                   </button>
                 );
