@@ -20,6 +20,8 @@ interface ChatListProps {
   extraChats?: Chat[];
   channels?: Channel[];
   folders?: ChatFolder[];
+  /** Slot for stories bar rendered above folder tabs. */
+  storiesSlot?: React.ReactNode;
 }
 
 function getChatName(chat: Chat) {
@@ -54,6 +56,7 @@ export function ChatList({
   extraChats = [],
   channels = [],
   folders = [],
+  storiesSlot,
 }: ChatListProps) {
   const [search, setSearch] = useState('');
   const [menuOpen, setMenuOpen] = useState(false);
@@ -168,6 +171,9 @@ export function ChatList({
           />
         </div>
       </div>
+
+      {/* Stories bar */}
+      {storiesSlot}
 
       {/* Folder tabs (horizontal scroll) */}
       {folders.length > 0 && (

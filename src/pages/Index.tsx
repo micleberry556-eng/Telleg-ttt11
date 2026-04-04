@@ -19,6 +19,9 @@ import { PrivacySettingsPage } from '@/components/settings/PrivacySettings';
 import { AppearanceSettings } from '@/components/settings/AppearanceSettings';
 import { FolderManager } from '@/components/folders/FolderManager';
 import { FolderEditor } from '@/components/folders/FolderEditor';
+import { StoriesBar } from '@/components/stories/StoriesBar';
+import { StoryViewer } from '@/components/stories/StoryViewer';
+import { CreateStory } from '@/components/stories/CreateStory';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -28,12 +31,15 @@ import {
   defaultTopics,
   defaultTopicMessages,
   DEFAULT_FOLDERS,
+  defaultStories,
   type Chat,
   type Channel,
   type ChannelPost,
   type ChannelPrivacy,
   type GroupPrivacy,
   type ChatFolder,
+  type UserStory,
+  type StoryItem,
   type Topic,
   type Message,
 } from '@/data/mockData';
@@ -57,7 +63,9 @@ type View =
   | 'create-post'
   | 'manage-folders'
   | 'create-folder'
-  | 'edit-folder';
+  | 'edit-folder'
+  | 'create-story'
+  | 'view-story';
 
 const Index = () => {
   const { privacy, updatePrivacy, appearance, updateAppearance } = useAuth();
@@ -73,6 +81,9 @@ const Index = () => {
   const [topicMessages, setTopicMessages] = useState<Record<string, Message[]>>(defaultTopicMessages);
   const [folders, setFolders] = useState<ChatFolder[]>(DEFAULT_FOLDERS);
   const [editingFolderId, setEditingFolderId] = useState<string | null>(null);
+  const [stories, setStories] = useState<UserStory[]>(defaultStories);
+  const [myStory, setMyStory] = useState<UserStory>({ userId: 'me', items: [], viewedIds: [] });
+  const [viewingStoryUserId, setViewingStoryUserId] = useState<string | null>(null);
   const isMobile = useIsMobile();
 
   // On mobile: show sidebar when nothing is actively open, OR when viewing topic list.
@@ -253,6 +264,34 @@ const Index = () => {
     setView('edit-folder');
   };
 
+  /* ── Story handlers ── */
+  const handleViewStory = (userId: string) => {
+    setViewingStoryUserId(userId);
+    setView('view-story');
+  };
+
+  const handleMarkStoryViewed = (userId: string, storyId: string) => {
+    if (userId === 'me') {
+      setMyStory(prev => ({
+        ...prev,
+        viewedIds: prev.viewedIds.includes(storyId) ? prev.viewedIds : [...prev.viewedIds, storyId],
+      }));
+    } else {
+      setStories(prev =>
+        prev.map(s =>
+          s.userId === userId
+            ? { ...s, viewedIds: s.viewedIds.includes(storyId) ? s.viewedIds : [...s.viewedIds, storyId] }
+            : s,
+        ),
+      );
+    }
+  };
+
+  const handleStoryCreated = (item: StoryItem) => {
+    setMyStory(prev => ({ ...prev, items: [...prev.items, item] }));
+    setView('chat');
+  };
+
   const handleBack = () => {
     if (activeTopicId) {
       setActiveTopicId(null);
@@ -298,6 +337,14 @@ const Index = () => {
         extraChats={createdGroups}
         channels={channels}
         folders={folders}
+        storiesSlot={
+          <StoriesBar
+            stories={stories}
+            myStory={myStory}
+            onViewStory={handleViewStory}
+            onCreateStory={() => setView('create-story')}
+          />
+        }
       />
     );
   };
@@ -450,6 +497,20 @@ const Index = () => {
             folder={editingFolder || undefined}
             onBack={() => setView('manage-folders')}
             onSave={handleFolderSaved}
+          />
+        )}
+        {view === 'create-story' && (
+          <CreateStory
+            onBack={() => setView('chat')}
+            onCreated={handleStoryCreated}
+          />
+        )}
+        {view === 'view-story' && viewingStoryUserId && (
+          <StoryViewer
+            stories={viewingStoryUserId === 'me' ? [myStory, ...stories] : [...stories, ...(myStory.items.length > 0 ? [myStory] : [])]}
+            initialUserId={viewingStoryUserId}
+            onClose={() => { setViewingStoryUserId(null); setView('chat'); }}
+            onMarkViewed={handleMarkStoryViewed}
           />
         )}
       </AnimatePresence>
