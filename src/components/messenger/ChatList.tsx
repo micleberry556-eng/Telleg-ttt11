@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { Search, Menu, Settings, Users, MessageCircle, Plus, Megaphone } from 'lucide-react';
+import { Search, Menu, Settings, Users, MessageCircle, Plus, Megaphone, FolderOpen } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Avatar } from './Avatar';
-import { chats as defaultChats, users, type Chat, type Channel } from '@/data/mockData';
+import { chats as defaultChats, users, type Chat, type Channel, type ChatFolder } from '@/data/mockData';
 import { motion, AnimatePresence } from 'framer-motion';
 
 type Tab = 'chats' | 'groups' | 'channels';
@@ -16,8 +16,10 @@ interface ChatListProps {
   onOpenAdmin: () => void;
   onCreateGroup: () => void;
   onCreateChannel: () => void;
+  onManageFolders: () => void;
   extraChats?: Chat[];
   channels?: Channel[];
+  folders?: ChatFolder[];
 }
 
 function getChatName(chat: Chat) {
@@ -31,6 +33,14 @@ function getChatUser(chat: Chat) {
   return users.find(u => u.id === other);
 }
 
+/** Check if a chat matches a folder's filter criteria. */
+function chatMatchesFolder(chat: Chat, folder: ChatFolder): boolean {
+  if (folder.excludeChatIds.includes(chat.id)) return false;
+  if (folder.includeChatIds.includes(chat.id)) return true;
+  if (folder.includeTypes.length > 0 && folder.includeTypes.includes(chat.type)) return true;
+  return false;
+}
+
 export function ChatList({
   activeChatId,
   activeChannelId,
@@ -40,30 +50,54 @@ export function ChatList({
   onOpenAdmin,
   onCreateGroup,
   onCreateChannel,
+  onManageFolders,
   extraChats = [],
   channels = [],
+  folders = [],
 }: ChatListProps) {
   const [search, setSearch] = useState('');
   const [menuOpen, setMenuOpen] = useState(false);
   const [tab, setTab] = useState<Tab>('chats');
+  const [activeFolderId, setActiveFolderId] = useState<string | null>(null);
 
   const allChats = [...defaultChats, ...extraChats];
+  const activeFolder = activeFolderId ? folders.find(f => f.id === activeFolderId) : null;
 
-  const visibleChats = allChats.filter(chat => {
+  // Apply folder filter.
+  const folderFilteredChats = activeFolder
+    ? allChats.filter(chat => chatMatchesFolder(chat, activeFolder))
+    : allChats;
+
+  const folderFilteredChannels = activeFolder?.includeChannels ? channels : (activeFolderId ? [] : channels);
+
+  const visibleChats = folderFilteredChats.filter(chat => {
     const matchesSearch = getChatName(chat).toLowerCase().includes(search.toLowerCase());
     if (tab === 'groups') return chat.type === 'group' && matchesSearch;
     return matchesSearch;
   });
 
-  const visibleChannels = channels.filter(ch =>
+  const visibleChannels = folderFilteredChannels.filter(ch =>
     ch.name.toLowerCase().includes(search.toLowerCase()),
   );
 
-  const tabs: { key: Tab; label: string }[] = [
-    { key: 'chats', label: 'Чаты' },
-    { key: 'groups', label: 'Группы' },
-    { key: 'channels', label: 'Каналы' },
+  // Determine which tabs to show based on folder.
+  const showChannelsTab = !activeFolderId || (activeFolder?.includeChannels ?? false);
+  const showGroupsTab = !activeFolderId || (activeFolder?.includeTypes.includes('group') ?? false);
+
+  const tabs: { key: Tab; label: string; visible: boolean }[] = [
+    { key: 'chats', label: 'Чаты', visible: true },
+    { key: 'groups', label: 'Группы', visible: showGroupsTab },
+    { key: 'channels', label: 'Каналы', visible: showChannelsTab },
   ];
+
+  const visibleTabs = tabs.filter(t => t.visible);
+
+  // Reset tab if current tab is hidden by folder filter.
+  if (!visibleTabs.find(t => t.key === tab)) {
+    // This is a render-time side effect, but safe since it only happens on folder change.
+    // We handle it by checking in the render.
+  }
+  const effectiveTab = visibleTabs.find(t => t.key === tab) ? tab : 'chats';
 
   return (
     <div className="flex flex-col h-full bg-card border-r border-border">
@@ -99,6 +133,13 @@ export function ChatList({
                   Новый канал
                 </button>
                 <button
+                  onClick={() => { onManageFolders(); setMenuOpen(false); }}
+                  className="flex items-center gap-3 w-full px-4 py-3 text-sm hover:bg-muted transition-colors text-foreground"
+                >
+                  <FolderOpen className="w-4 h-4 text-muted-foreground" />
+                  Папки чатов
+                </button>
+                <button
                   onClick={() => { onOpenSettings(); setMenuOpen(false); }}
                   className="flex items-center gap-3 w-full px-4 py-3 text-sm hover:bg-muted transition-colors text-foreground"
                 >
@@ -128,19 +169,47 @@ export function ChatList({
         </div>
       </div>
 
-      {/* Tabs */}
+      {/* Folder tabs (horizontal scroll) */}
+      {folders.length > 0 && (
+        <div className="flex items-center gap-1 px-2 py-1.5 border-b border-border overflow-x-auto scrollbar-none">
+          <button
+            onClick={() => { setActiveFolderId(null); setTab('chats'); }}
+            className={cn(
+              'flex-shrink-0 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors',
+              !activeFolderId ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-muted',
+            )}
+          >
+            Все
+          </button>
+          {folders.map(folder => (
+            <button
+              key={folder.id}
+              onClick={() => { setActiveFolderId(folder.id); setTab('chats'); }}
+              className={cn(
+                'flex-shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors',
+                activeFolderId === folder.id ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-muted',
+              )}
+            >
+              <span className="text-sm">{folder.icon}</span>
+              {folder.name}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Type tabs */}
       <div className="flex border-b border-border">
-        {tabs.map(t => (
+        {visibleTabs.map(t => (
           <button
             key={t.key}
             onClick={() => setTab(t.key)}
             className={cn(
               'flex-1 py-2.5 text-xs font-medium transition-colors relative',
-              tab === t.key ? 'text-primary' : 'text-muted-foreground hover:text-foreground',
+              effectiveTab === t.key ? 'text-primary' : 'text-muted-foreground hover:text-foreground',
             )}
           >
             {t.label}
-            {tab === t.key && (
+            {effectiveTab === t.key && (
               <motion.div
                 layoutId="tab-indicator"
                 className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"
@@ -153,9 +222,8 @@ export function ChatList({
       {/* Content */}
       <div className="flex-1 overflow-y-auto">
         {/* ── Channels tab ── */}
-        {tab === 'channels' && (
+        {effectiveTab === 'channels' && (
           <>
-            {/* Create channel button */}
             <button
               onClick={onCreateChannel}
               className="w-full flex items-center gap-3 px-3 py-3 hover:bg-chat-hover transition-colors text-left border-b border-border/50"
@@ -208,32 +276,29 @@ export function ChatList({
               <div className="flex flex-col items-center justify-center h-40 text-muted-foreground">
                 <Megaphone className="w-8 h-8 mb-2 opacity-50" />
                 <p className="text-sm">Каналов пока нет</p>
-                <p className="text-xs mt-1">Создайте первый канал</p>
               </div>
             )}
           </>
         )}
 
         {/* ── Groups tab ── */}
-        {tab === 'groups' && (
-          <>
-            <button
-              onClick={onCreateGroup}
-              className="w-full flex items-center gap-3 px-3 py-3 hover:bg-chat-hover transition-colors text-left border-b border-border/50"
-            >
-              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                <Plus className="w-6 h-6 text-primary" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-primary">Создать группу</p>
-                <p className="text-xs text-muted-foreground">Добавьте участников</p>
-              </div>
-            </button>
-          </>
+        {effectiveTab === 'groups' && (
+          <button
+            onClick={onCreateGroup}
+            className="w-full flex items-center gap-3 px-3 py-3 hover:bg-chat-hover transition-colors text-left border-b border-border/50"
+          >
+            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+              <Plus className="w-6 h-6 text-primary" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-primary">Создать группу</p>
+              <p className="text-xs text-muted-foreground">Добавьте участников</p>
+            </div>
+          </button>
         )}
 
         {/* ── Chats / Groups list ── */}
-        {tab !== 'channels' && (
+        {effectiveTab !== 'channels' && (
           <>
             {visibleChats.map(chat => {
               const name = getChatName(chat);
@@ -296,11 +361,10 @@ export function ChatList({
 
             {visibleChats.length === 0 && (
               <div className="flex flex-col items-center justify-center h-40 text-muted-foreground">
-                {tab === 'groups' ? (
+                {effectiveTab === 'groups' ? (
                   <>
                     <Users className="w-8 h-8 mb-2 opacity-50" />
                     <p className="text-sm">Групп пока нет</p>
-                    <p className="text-xs mt-1">Создайте первую группу</p>
                   </>
                 ) : (
                   <>

@@ -6,6 +6,28 @@ export interface User {
   avatar?: string;
 }
 
+/* ── Chat Folders ── */
+
+export interface ChatFolder {
+  id: string;
+  name: string;
+  icon: string;
+  /** Filter by chat type. Empty = no type filter (include all). */
+  includeTypes: ('private' | 'group')[];
+  /** Include channels in this folder. */
+  includeChannels: boolean;
+  /** Specific chat IDs to include (overrides type filter). Empty = use type filter. */
+  includeChatIds: string[];
+  /** Specific chat IDs to exclude. */
+  excludeChatIds: string[];
+}
+
+export const DEFAULT_FOLDERS: ChatFolder[] = [
+  { id: 'folder-personal', name: 'Личные', icon: '👤', includeTypes: ['private'], includeChannels: false, includeChatIds: [], excludeChatIds: [] },
+  { id: 'folder-groups', name: 'Группы', icon: '👥', includeTypes: ['group'], includeChannels: false, includeChatIds: [], excludeChatIds: [] },
+  { id: 'folder-channels', name: 'Каналы', icon: '📢', includeTypes: [], includeChannels: true, includeChatIds: [], excludeChatIds: [] },
+];
+
 export interface Message {
   id: string;
   chatId: string;
