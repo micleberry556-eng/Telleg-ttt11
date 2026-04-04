@@ -495,6 +495,8 @@ const Index = () => {
         {(view === 'create-folder' || view === 'edit-folder') && (
           <FolderEditor
             folder={editingFolder || undefined}
+            availableChats={allChats}
+            availableChannels={channels}
             onBack={() => setView('manage-folders')}
             onSave={handleFolderSaved}
           />

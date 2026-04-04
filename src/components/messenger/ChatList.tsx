@@ -71,7 +71,12 @@ export function ChatList({
     ? allChats.filter(chat => chatMatchesFolder(chat, activeFolder))
     : allChats;
 
-  const folderFilteredChannels = activeFolder?.includeChannels ? channels : (activeFolderId ? [] : channels);
+  const folderFilteredChannels = activeFolder
+    ? channels.filter(ch =>
+        activeFolder.includeChannels ||
+        activeFolder.includeChatIds.includes(ch.id),
+      )
+    : channels;
 
   const visibleChats = folderFilteredChats.filter(chat => {
     const matchesSearch = getChatName(chat).toLowerCase().includes(search.toLowerCase());
@@ -84,8 +89,8 @@ export function ChatList({
   );
 
   // Determine which tabs to show based on folder.
-  const showChannelsTab = !activeFolderId || (activeFolder?.includeChannels ?? false);
-  const showGroupsTab = !activeFolderId || (activeFolder?.includeTypes.includes('group') ?? false);
+  const showChannelsTab = !activeFolderId || folderFilteredChannels.length > 0;
+  const showGroupsTab = !activeFolderId || folderFilteredChats.some(c => c.type === 'group');
 
   const tabs: { key: Tab; label: string; visible: boolean }[] = [
     { key: 'chats', label: 'Чаты', visible: true },
