@@ -16,6 +16,7 @@ import { ChannelInfo } from '@/components/channels/ChannelInfo';
 import { CreatePost } from '@/components/channels/CreatePost';
 import { ChannelPrivacyPage } from '@/components/channels/ChannelPrivacyPage';
 import { PrivacySettingsPage } from '@/components/settings/PrivacySettings';
+import { AppearanceSettings } from '@/components/settings/AppearanceSettings';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -38,6 +39,7 @@ type View =
   | 'chat'
   | 'settings'
   | 'privacy'
+  | 'appearance'
   | 'admin'
   | 'create-group'
   | 'group-info'
@@ -51,7 +53,7 @@ type View =
   | 'create-post';
 
 const Index = () => {
-  const { privacy, updatePrivacy } = useAuth();
+  const { privacy, updatePrivacy, appearance, updateAppearance } = useAuth();
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
   const [activeChannelId, setActiveChannelId] = useState<string | null>(null);
   const [activeTopicId, setActiveTopicId] = useState<string | null>(null);
@@ -327,12 +329,19 @@ const Index = () => {
         </div>
       )}
       <AnimatePresence>
-        {view === 'settings' && <ProfileSettings onBack={() => setView('chat')} onOpenPrivacy={() => setView('privacy')} />}
+        {view === 'settings' && <ProfileSettings onBack={() => setView('chat')} onOpenPrivacy={() => setView('privacy')} onOpenAppearance={() => setView('appearance')} />}
         {view === 'privacy' && (
           <PrivacySettingsPage
             privacy={privacy}
             onBack={() => setView('settings')}
             onChange={updatePrivacy}
+          />
+        )}
+        {view === 'appearance' && (
+          <AppearanceSettings
+            config={appearance}
+            onBack={() => setView('settings')}
+            onChange={updateAppearance}
           />
         )}
         {view === 'admin' && <AdminPanel onBack={() => setView('chat')} />}

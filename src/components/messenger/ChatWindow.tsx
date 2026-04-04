@@ -3,6 +3,8 @@ import { Send, Paperclip, Smile, Phone, MoreVertical, ArrowLeft, Users, Hash } f
 import { cn } from '@/lib/utils';
 import { Avatar } from './Avatar';
 import { messages, users, chats as defaultChats, type Message, type Chat } from '@/data/mockData';
+import { useAuth } from '@/contexts/AuthContext';
+import { getFontSizeClass, getBubbleClasses, getBackgroundClass } from '@/components/settings/AppearanceSettings';
 import { motion } from 'framer-motion';
 
 interface ChatWindowProps {
@@ -32,6 +34,10 @@ export function ChatWindow({
 }: ChatWindowProps) {
   const allChats = [...defaultChats, ...extraChats];
   const chat = allChats.find(c => c.id === chatId);
+  const { appearance } = useAuth();
+  const bubbleCls = getBubbleClasses(appearance.bubbleStyle);
+  const fontCls = getFontSizeClass(appearance.fontSize);
+  const bgCls = getBackgroundClass(appearance.chatBackground);
 
   // For regular chats, use local state from mock data.
   // For topics, use the externally-provided topicMessages.
@@ -92,7 +98,7 @@ export function ChatWindow({
   };
 
   return (
-    <div className="flex flex-col h-full bg-chat-bg">
+    <div className={cn('flex flex-col h-full bg-chat-bg', bgCls)}>
       {/* Header */}
       <div className="flex items-center gap-3 px-4 py-3 bg-card border-b border-border">
         {onBack && (
@@ -174,7 +180,7 @@ export function ChatWindow({
                   {showAvatar && sender && <Avatar name={sender.name} size="sm" />}
                 </div>
               )}
-              <div className={cn('max-w-[75%] px-3.5 py-2 text-sm', isOwn ? 'chat-bubble-own' : 'chat-bubble-other')}>
+              <div className={cn('max-w-[75%] px-3.5 py-2', fontCls, isOwn ? cn('bg-primary text-primary-foreground', bubbleCls.own) : cn('bg-[hsl(var(--chat-bubble-other))] text-[hsl(var(--chat-bubble-other-foreground))]', bubbleCls.other))}>
                 {!isOwn && showGroupAvatar && showAvatar && sender && (
                   <p className="text-xs font-medium text-primary mb-0.5">{sender.name}</p>
                 )}
