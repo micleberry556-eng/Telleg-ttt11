@@ -238,10 +238,34 @@ const Index = () => {
   };
 
   const handleGroupPrivacyChange = (chatId: string, newPrivacy: GroupPrivacy) => {
-    // Update in createdGroups (user-created groups).
     setCreatedGroups(prev =>
       prev.map(c => (c.id === chatId ? { ...c, groupPrivacy: newPrivacy } : c)),
     );
+  };
+
+  /* ── Admin moderation handlers ── */
+  const handleAdminDeleteChat = (chatId: string) => {
+    setCreatedGroups(prev => prev.filter(c => c.id !== chatId));
+    setTopics(prev => prev.filter(t => t.groupId !== chatId));
+    if (activeChatId === chatId) { setActiveChatId(null); setActiveTopicId(null); }
+  };
+
+  const handleAdminDeletePost = (channelId: string, postId: string) => {
+    setChannelPosts(prev => ({
+      ...prev,
+      [channelId]: (prev[channelId] || []).filter(p => p.id !== postId),
+    }));
+  };
+
+  const handleAdminDeleteMedia = (channelId: string, postId: string, mediaIndex: number) => {
+    setChannelPosts(prev => ({
+      ...prev,
+      [channelId]: (prev[channelId] || []).map(p =>
+        p.id === postId
+          ? { ...p, media: p.media?.filter((_, i) => i !== mediaIndex) }
+          : p,
+      ),
+    }));
   };
 
   /* ── Folder handlers ── */
@@ -423,7 +447,20 @@ const Index = () => {
             onChange={updateAppearance}
           />
         )}
-        {view === 'admin' && <AdminPanel onBack={() => setView('chat')} settings={systemSettings} onSettingsChange={updateSystemSettings} />}
+        {view === 'admin' && (
+          <AdminPanel
+            onBack={() => setView('chat')}
+            settings={systemSettings}
+            onSettingsChange={updateSystemSettings}
+            allChats={allChats}
+            allChannels={channels}
+            allChannelPosts={channelPosts}
+            onDeleteChat={handleAdminDeleteChat}
+            onDeleteChannel={handleDeleteChannel}
+            onDeletePost={handleAdminDeletePost}
+            onDeleteMedia={handleAdminDeleteMedia}
+          />
+        )}
         {view === 'create-group' && (
           <CreateGroup onBack={() => setView('chat')} onCreated={handleGroupCreated} />
         )}
