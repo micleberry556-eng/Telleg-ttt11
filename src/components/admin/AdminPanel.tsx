@@ -7,13 +7,19 @@ import {
   BarChart3,
   Palette,
   CircleDot,
+  Trash2,
+  Radio,
+  Image,
+  Film,
+  Music,
+  X,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Avatar } from '@/components/messenger/Avatar';
-import { users, chats, defaultChannels } from '@/data/mockData';
+import { users, defaultChannels, type Chat, type Channel, type ChannelPost, type PostMedia } from '@/data/mockData';
 import { motion } from 'framer-motion';
 
-/* ── System settings types ── */
+/* ── System settings types (kept for export) ── */
 
 export type IconSize = 'small' | 'medium' | 'large';
 export type IconStyle = 'outline' | 'filled';
@@ -41,8 +47,6 @@ export const DEFAULT_SYSTEM_SETTINGS: SystemSettings = {
   borderRadius: 'rounded',
   animations: true,
 };
-
-/* ── CSS generators ── */
 
 const FONT_MAP: Record<FontFamily, { label: string; css: string }> = {
   space: { label: 'Space Grotesk', css: "'Space Grotesk', system-ui, sans-serif" },
@@ -80,11 +84,8 @@ const ICON_SIZE_MAP: Record<IconSize, { label: string; cls: string }> = {
 
 export function applySystemSettings(s: SystemSettings) {
   const root = document.documentElement;
-  // Font
   root.style.fontFamily = FONT_MAP[s.fontFamily].css;
-  // Border radius
   root.style.setProperty('--radius', RADIUS_MAP[s.borderRadius].value);
-  // Animations
   if (!s.animations) {
     root.style.setProperty('--animate-duration', '0s');
     root.classList.add('no-animations');
@@ -94,16 +95,21 @@ export function applySystemSettings(s: SystemSettings) {
   }
 }
 
-export function getWallpaperClass(w: WallpaperStyle): string {
-  return WALLPAPER_MAP[w].preview;
+export function getWallpaperClass(w: WallpaperStyle): string { return WALLPAPER_MAP[w].preview; }
+export function getIconSizeClass(s: IconSize): string { return ICON_SIZE_MAP[s].cls; }
+export function getDensityClass(d: UIDensity): string { return DENSITY_MAP[d].py; }
+
+/* ── Helper: get chat display name ── */
+function getChatName(chat: Chat) {
+  if (chat.name) return chat.name;
+  const other = chat.participants.find(p => p !== 'me');
+  return users.find(u => u.id === other)?.name ?? 'Unknown';
 }
 
-export function getIconSizeClass(s: IconSize): string {
-  return ICON_SIZE_MAP[s].cls;
-}
-
-export function getDensityClass(d: UIDensity): string {
-  return DENSITY_MAP[d].py;
+function mediaIcon(type: PostMedia['type']) {
+  if (type === 'image') return Image;
+  if (type === 'video') return Film;
+  return Music;
 }
 
 /* ── Component ── */
@@ -112,12 +118,31 @@ interface AdminPanelProps {
   onBack: () => void;
   settings: SystemSettings;
   onSettingsChange: (s: SystemSettings) => void;
+  /** All chats (default + created groups). */
+  allChats: Chat[];
+  /** All channels. */
+  allChannels: Channel[];
+  /** All channel posts keyed by channel ID. */
+  allChannelPosts: Record<string, ChannelPost[]>;
+  /** Delete a chat or group by ID. */
+  onDeleteChat: (chatId: string) => void;
+  /** Delete a channel by ID. */
+  onDeleteChannel: (channelId: string) => void;
+  /** Delete a specific post from a channel. */
+  onDeletePost: (channelId: string, postId: string) => void;
+  /** Delete a specific media item from a post. */
+  onDeleteMedia: (channelId: string, postId: string, mediaIndex: number) => void;
 }
 
-type Tab = 'stats' | 'customize';
+type Tab = 'stats' | 'moderation' | 'customize';
 
-export function AdminPanel({ onBack, settings, onSettingsChange }: AdminPanelProps) {
+export function AdminPanel({
+  onBack, settings, onSettingsChange,
+  allChats, allChannels, allChannelPosts,
+  onDeleteChat, onDeleteChannel, onDeletePost, onDeleteMedia,
+}: AdminPanelProps) {
   const [tab, setTab] = useState<Tab>('stats');
+  const [confirmId, setConfirmId] = useState<string | null>(null);
 
   const update = (partial: Partial<SystemSettings>) => {
     const next = { ...settings, ...partial };
@@ -126,8 +151,19 @@ export function AdminPanel({ onBack, settings, onSettingsChange }: AdminPanelPro
   };
 
   const onlineCount = users.filter(u => u.online).length;
-  const groupCount = chats.filter(c => c.type === 'group').length;
-  const privateCount = chats.filter(c => c.type === 'private').length;
+  const groupCount = allChats.filter(c => c.type === 'group').length;
+  const privateCount = allChats.filter(c => c.type === 'private').length;
+  const totalPosts = Object.values(allChannelPosts).reduce((sum, posts) => sum + posts.length, 0);
+  const totalMedia = Object.values(allChannelPosts).flat().reduce((sum, p) => sum + (p.media?.length || 0), 0);
+
+  const handleDelete = (id: string, action: () => void) => {
+    if (confirmId === id) {
+      action();
+      setConfirmId(null);
+    } else {
+      setConfirmId(id);
+    }
+  };
 
   return (
     <motion.div
@@ -150,13 +186,14 @@ export function AdminPanel({ onBack, settings, onSettingsChange }: AdminPanelPro
       <div className="flex border-b border-border">
         {([
           { key: 'stats' as Tab, label: 'Статистика', icon: BarChart3 },
-          { key: 'customize' as Tab, label: 'Настройки системы', icon: Palette },
+          { key: 'moderation' as Tab, label: 'Модерация', icon: Shield },
+          { key: 'customize' as Tab, label: 'Настройки', icon: Palette },
         ]).map(t => (
           <button
             key={t.key}
             onClick={() => setTab(t.key)}
             className={cn(
-              'flex-1 flex items-center justify-center gap-2 py-3 text-xs font-medium transition-colors relative',
+              'flex-1 flex items-center justify-center gap-1.5 py-3 text-[11px] font-medium transition-colors relative',
               tab === t.key ? 'text-primary' : 'text-muted-foreground hover:text-foreground',
             )}
           >
@@ -173,11 +210,10 @@ export function AdminPanel({ onBack, settings, onSettingsChange }: AdminPanelPro
         {/* ── Stats tab ── */}
         {tab === 'stats' && (
           <div className="p-4 space-y-4">
-            {/* Stat cards */}
             <div className="grid grid-cols-2 gap-3">
               {[
                 { icon: UsersRound, label: 'Пользователи', value: users.length, color: 'from-violet-500/15 to-fuchsia-500/10' },
-                { icon: Zap, label: 'Чаты', value: chats.length, color: 'from-blue-500/15 to-cyan-500/10' },
+                { icon: Zap, label: 'Чаты', value: allChats.length, color: 'from-blue-500/15 to-cyan-500/10' },
                 { icon: Shield, label: 'Онлайн', value: onlineCount, color: 'from-emerald-500/15 to-teal-500/10' },
                 { icon: BarChart3, label: 'Группы', value: groupCount, color: 'from-amber-500/15 to-orange-500/10' },
               ].map(stat => (
@@ -190,13 +226,13 @@ export function AdminPanel({ onBack, settings, onSettingsChange }: AdminPanelPro
                 </div>
               ))}
             </div>
-
-            {/* Extra stats */}
             <div className="glass-card rounded-2xl p-4 space-y-3">
               <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Детали</h3>
               {[
                 { label: 'Личные чаты', value: privateCount },
-                { label: 'Каналы', value: defaultChannels.length },
+                { label: 'Каналы', value: allChannels.length },
+                { label: 'Публикации', value: totalPosts },
+                { label: 'Медиафайлы', value: totalMedia },
                 { label: 'Офлайн', value: users.length - onlineCount },
               ].map(row => (
                 <div key={row.label} className="flex items-center justify-between">
@@ -205,8 +241,6 @@ export function AdminPanel({ onBack, settings, onSettingsChange }: AdminPanelPro
                 </div>
               ))}
             </div>
-
-            {/* User list */}
             <div>
               <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3 px-1">Пользователи</h3>
               <div className="glass-card rounded-2xl overflow-hidden">
@@ -224,11 +258,139 @@ export function AdminPanel({ onBack, settings, onSettingsChange }: AdminPanelPro
           </div>
         )}
 
+        {/* ── Moderation tab ── */}
+        {tab === 'moderation' && (
+          <div className="p-4 space-y-5">
+
+            {/* Chats & Groups */}
+            <div>
+              <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3 px-1 flex items-center gap-2">
+                <Zap className="w-3.5 h-3.5" /> Чаты и группы ({allChats.length})
+              </h3>
+              <div className="glass-card rounded-2xl overflow-hidden">
+                {allChats.map((chat, i) => (
+                  <div key={chat.id} className={cn('flex items-center gap-3 px-4 py-3', i > 0 && 'border-t border-border/50')}>
+                    {chat.type === 'group' ? (
+                      <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                        <UsersRound className="w-4 h-4 text-primary" />
+                      </div>
+                    ) : (
+                      <Avatar name={getChatName(chat)} size="sm" />
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-foreground truncate">{getChatName(chat)}</p>
+                      <p className="text-[11px] text-muted-foreground">
+                        {chat.type === 'group' ? `Группа · ${chat.participants.length} уч.` : 'Личный чат'}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => handleDelete(`chat-${chat.id}`, () => onDeleteChat(chat.id))}
+                      className={cn(
+                        'px-2.5 py-1.5 rounded-lg text-[11px] font-medium transition-all flex-shrink-0',
+                        confirmId === `chat-${chat.id}`
+                          ? 'bg-destructive text-white'
+                          : 'bg-destructive/10 text-destructive hover:bg-destructive/20',
+                      )}
+                    >
+                      {confirmId === `chat-${chat.id}` ? 'Точно?' : 'Удалить'}
+                    </button>
+                  </div>
+                ))}
+                {allChats.length === 0 && (
+                  <p className="text-sm text-muted-foreground text-center py-6">Нет чатов</p>
+                )}
+              </div>
+            </div>
+
+            {/* Channels */}
+            <div>
+              <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3 px-1 flex items-center gap-2">
+                <Radio className="w-3.5 h-3.5" /> Каналы ({allChannels.length})
+              </h3>
+              <div className="glass-card rounded-2xl overflow-hidden">
+                {allChannels.map((ch, i) => (
+                  <div key={ch.id} className={cn('px-4 py-3', i > 0 && 'border-t border-border/50')}>
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                        <Radio className="w-4 h-4 text-primary" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-foreground truncate">{ch.name}</p>
+                        <p className="text-[11px] text-muted-foreground">{ch.subscriberCount} подп.</p>
+                      </div>
+                      <button
+                        onClick={() => handleDelete(`ch-${ch.id}`, () => onDeleteChannel(ch.id))}
+                        className={cn(
+                          'px-2.5 py-1.5 rounded-lg text-[11px] font-medium transition-all flex-shrink-0',
+                          confirmId === `ch-${ch.id}`
+                            ? 'bg-destructive text-white'
+                            : 'bg-destructive/10 text-destructive hover:bg-destructive/20',
+                        )}
+                      >
+                        {confirmId === `ch-${ch.id}` ? 'Точно?' : 'Удалить'}
+                      </button>
+                    </div>
+
+                    {/* Posts in this channel */}
+                    {(allChannelPosts[ch.id] || []).length > 0 && (
+                      <div className="mt-2 ml-11 space-y-1.5">
+                        {(allChannelPosts[ch.id] || []).map(post => (
+                          <div key={post.id} className="bg-muted/30 rounded-lg p-2.5">
+                            <div className="flex items-start gap-2">
+                              <div className="flex-1 min-w-0">
+                                {post.text && <p className="text-xs text-foreground truncate">{post.text}</p>}
+                                {/* Media items */}
+                                {post.media && post.media.length > 0 && (
+                                  <div className="flex flex-wrap gap-1 mt-1">
+                                    {post.media.map((m, mi) => {
+                                      const MIcon = mediaIcon(m.type);
+                                      return (
+                                        <span key={mi} className="inline-flex items-center gap-1 bg-muted rounded px-1.5 py-0.5 text-[10px] text-muted-foreground">
+                                          <MIcon className="w-3 h-3" />
+                                          {m.name || m.type}
+                                          <button
+                                            onClick={() => handleDelete(`media-${post.id}-${mi}`, () => onDeleteMedia(ch.id, post.id, mi))}
+                                            className={cn(
+                                              'ml-0.5 rounded transition-colors',
+                                              confirmId === `media-${post.id}-${mi}` ? 'text-destructive' : 'text-muted-foreground hover:text-destructive',
+                                            )}
+                                          >
+                                            <X className="w-3 h-3" />
+                                          </button>
+                                        </span>
+                                      );
+                                    })}
+                                  </div>
+                                )}
+                                <p className="text-[10px] text-muted-foreground mt-1">{post.timestamp}</p>
+                              </div>
+                              <button
+                                onClick={() => handleDelete(`post-${post.id}`, () => onDeletePost(ch.id, post.id))}
+                                className={cn(
+                                  'p-1 rounded transition-colors flex-shrink-0',
+                                  confirmId === `post-${post.id}` ? 'text-destructive bg-destructive/10' : 'text-muted-foreground hover:text-destructive',
+                                )}
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+                {allChannels.length === 0 && (
+                  <p className="text-sm text-muted-foreground text-center py-6">Нет каналов</p>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* ── Customize tab ── */}
         {tab === 'customize' && (
           <div className="p-4 space-y-5">
-
-            {/* Icon style */}
             <Section icon={CircleDot} title="Стиль иконок">
               <div className="flex gap-2">
                 {([
@@ -242,8 +404,6 @@ export function AdminPanel({ onBack, settings, onSettingsChange }: AdminPanelPro
                 ))}
               </div>
             </Section>
-
-            {/* Reset */}
             <button
               onClick={() => { onSettingsChange(DEFAULT_SYSTEM_SETTINGS); applySystemSettings(DEFAULT_SYSTEM_SETTINGS); }}
               className="w-full text-center text-sm text-muted-foreground hover:text-foreground py-3 transition-colors"
@@ -259,7 +419,7 @@ export function AdminPanel({ onBack, settings, onSettingsChange }: AdminPanelPro
 
 /* ── Helper components ── */
 
-function Section({ icon: Icon, title, children }: { icon: typeof Type; title: string; children: React.ReactNode }) {
+function Section({ icon: Icon, title, children }: { icon: typeof CircleDot; title: string; children: React.ReactNode }) {
   return (
     <div>
       <div className="flex items-center gap-2 mb-2.5">
