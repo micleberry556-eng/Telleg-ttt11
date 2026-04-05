@@ -68,7 +68,7 @@ type View =
   | 'view-story';
 
 const Index = () => {
-  const { privacy, updatePrivacy, appearance, updateAppearance } = useAuth();
+  const { privacy, updatePrivacy, appearance, updateAppearance, systemSettings, updateSystemSettings } = useAuth();
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
   const [activeChannelId, setActiveChannelId] = useState<string | null>(null);
   const [activeTopicId, setActiveTopicId] = useState<string | null>(null);
@@ -423,7 +423,7 @@ const Index = () => {
             onChange={updateAppearance}
           />
         )}
-        {view === 'admin' && <AdminPanel onBack={() => setView('chat')} />}
+        {view === 'admin' && <AdminPanel onBack={() => setView('chat')} settings={systemSettings} onSettingsChange={updateSystemSettings} />}
         {view === 'create-group' && (
           <CreateGroup onBack={() => setView('chat')} onCreated={handleGroupCreated} />
         )}

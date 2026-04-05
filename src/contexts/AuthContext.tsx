@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import { type PrivacySettings, DEFAULT_PRIVACY } from '@/components/settings/PrivacySettings';
 import { type AppearanceConfig, DEFAULT_APPEARANCE, getThemeCSSVars } from '@/components/settings/AppearanceSettings';
+import { type SystemSettings, DEFAULT_SYSTEM_SETTINGS, applySystemSettings } from '@/components/admin/AdminPanel';
 
 /** Simulated SMS verification code. In production, this would come from a backend. */
 const MOCK_SMS_CODE = '1234';
@@ -25,6 +26,7 @@ interface AuthContextValue {
   error: string | null;
   privacy: PrivacySettings;
   appearance: AppearanceConfig;
+  systemSettings: SystemSettings;
 
   submitPhone: (phone: string) => Promise<void>;
   verifyCode: (code: string) => Promise<boolean>;
@@ -34,6 +36,7 @@ interface AuthContextValue {
   goBack: () => void;
   updatePrivacy: (privacy: PrivacySettings) => void;
   updateAppearance: (appearance: AppearanceConfig) => void;
+  updateSystemSettings: (settings: SystemSettings) => void;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -41,6 +44,7 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 const STORAGE_KEY = 'telleg_auth_user';
 const PRIVACY_STORAGE_KEY = 'telleg_privacy';
 const APPEARANCE_STORAGE_KEY = 'telleg_appearance';
+const SYSTEM_SETTINGS_KEY = 'telleg_system_settings';
 
 function loadUser(): AuthUser | null {
   try {
@@ -82,6 +86,18 @@ function saveAppearance(config: AppearanceConfig) {
   localStorage.setItem(APPEARANCE_STORAGE_KEY, JSON.stringify(config));
 }
 
+function loadSystemSettings(): SystemSettings {
+  try {
+    const raw = localStorage.getItem(SYSTEM_SETTINGS_KEY);
+    if (raw) return { ...DEFAULT_SYSTEM_SETTINGS, ...JSON.parse(raw) };
+  } catch { /* ignore */ }
+  return DEFAULT_SYSTEM_SETTINGS;
+}
+
+function saveSystemSettings(s: SystemSettings) {
+  localStorage.setItem(SYSTEM_SETTINGS_KEY, JSON.stringify(s));
+}
+
 /** Apply CSS custom properties to :root so the theme takes effect globally. */
 function applyThemeToDOM(config: AppearanceConfig) {
   const vars = getThemeCSSVars(config);
@@ -99,14 +115,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState<string | null>(null);
   const [privacy, setPrivacy] = useState<PrivacySettings>(() => loadPrivacy());
   const [appearance, setAppearance] = useState<AppearanceConfig>(() => loadAppearance());
+  const [systemSettings, setSystemSettings] = useState<SystemSettings>(() => loadSystemSettings());
 
   // Keep localStorage in sync.
   useEffect(() => { if (user) saveUser(user); }, [user]);
   useEffect(() => { savePrivacy(privacy); }, [privacy]);
   useEffect(() => { saveAppearance(appearance); applyThemeToDOM(appearance); }, [appearance]);
+  useEffect(() => { saveSystemSettings(systemSettings); applySystemSettings(systemSettings); }, [systemSettings]);
 
   // Apply theme on initial load.
   useEffect(() => { applyThemeToDOM(appearance); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { applySystemSettings(systemSettings); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const submitPhone = async (phoneNumber: string) => {
     setError(null);
@@ -159,9 +178,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     clearUser();
     localStorage.removeItem(PRIVACY_STORAGE_KEY);
     localStorage.removeItem(APPEARANCE_STORAGE_KEY);
+    localStorage.removeItem(SYSTEM_SETTINGS_KEY);
     setPrivacy(DEFAULT_PRIVACY);
     setAppearance(DEFAULT_APPEARANCE);
+    setSystemSettings(DEFAULT_SYSTEM_SETTINGS);
     applyThemeToDOM(DEFAULT_APPEARANCE);
+    applySystemSettings(DEFAULT_SYSTEM_SETTINGS);
   };
 
   const resendCode = async () => {
@@ -179,10 +201,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const updatePrivacy = (p: PrivacySettings) => setPrivacy(p);
   const updateAppearance = (a: AppearanceConfig) => setAppearance(a);
+  const updateSystemSettings = (s: SystemSettings) => setSystemSettings(s);
 
   return (
     <AuthContext.Provider
-      value={{ user, step, phone, loading, error, privacy, appearance, submitPhone, verifyCode, setProfileName, logout, resendCode, goBack, updatePrivacy, updateAppearance }}
+      value={{ user, step, phone, loading, error, privacy, appearance, systemSettings, submitPhone, verifyCode, setProfileName, logout, resendCode, goBack, updatePrivacy, updateAppearance, updateSystemSettings }}
     >
       {children}
     </AuthContext.Provider>
