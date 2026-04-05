@@ -17,7 +17,7 @@ import { ChannelInfo } from '@/components/channels/ChannelInfo';
 import { CreatePost } from '@/components/channels/CreatePost';
 import { ChannelPrivacyPage } from '@/components/channels/ChannelPrivacyPage';
 import { PrivacySettingsPage } from '@/components/settings/PrivacySettings';
-import { AppearanceSettings, type AppearanceConfig } from '@/components/settings/AppearanceSettings';
+import { AppearanceSettings, type AppearanceConfig, applyAppearanceToDOM, getThemeCSSVars } from '@/components/settings/AppearanceSettings';
 import { FolderManager } from '@/components/folders/FolderManager';
 import { FolderEditor } from '@/components/folders/FolderEditor';
 import { StoriesBar } from '@/components/stories/StoriesBar';
@@ -323,11 +323,17 @@ const Index = () => {
   };
 
   const handleApplyTheme = (config: AppearanceConfig, cssOverrides: Record<string, string>, layout?: LayoutVariant, modifiers?: LayoutModifier[]) => {
+    // Apply the config to state (persists to localStorage via AuthContext).
     updateAppearance(config);
+    // Apply CSS variables to :root.
     const root = document.documentElement;
-    for (const [key, value] of Object.entries(cssOverrides)) {
+    const themeVars = getThemeCSSVars(config);
+    for (const [key, value] of Object.entries({ ...themeVars, ...cssOverrides })) {
       root.style.setProperty(key, value);
     }
+    // Apply font, animations, etc.
+    applyAppearanceToDOM(config);
+    // Apply layout and modifiers.
     if (layout) setActiveLayout(layout);
     if (modifiers) setActiveModifiers(modifiers);
   };
@@ -468,6 +474,7 @@ const Index = () => {
             config={appearance}
             onBack={() => setView('settings')}
             onChange={updateAppearance}
+            onOpenThemes={() => setView('theme-gallery')}
           />
         )}
         {view === 'admin' && (
@@ -579,7 +586,7 @@ const Index = () => {
         {view === 'theme-gallery' && (
           <ThemeGallery
             currentConfig={appearance}
-            onBack={() => setView('admin')}
+            onBack={() => setView('appearance')}
             onApply={handleApplyTheme}
           />
         )}
