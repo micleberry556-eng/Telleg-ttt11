@@ -119,7 +119,7 @@ function PostCard({ post }: { post: ChannelPost }) {
 
 export function ChannelFeed({ channel, posts, onBack, onOpenInfo, onCreatePost }: ChannelFeedProps) {
   return (
-    <div className="flex flex-col h-full bg-background/80 backdrop-blur-sm">
+    <div className="flex flex-col h-full bg-background/50 backdrop-blur-sm">
       {/* Header */}
       <div className="flex items-center gap-3 px-4 py-3 bg-card border-b border-border">
         {onBack && (
