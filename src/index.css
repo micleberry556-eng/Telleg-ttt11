@@ -207,3 +207,183 @@
   animation-duration: 0s !important;
   transition-duration: 0s !important;
 }
+
+/* ══════════════════════════════════════════════════════════
+   ANIME THEME — full kawaii/anime aesthetic
+   Applied via [data-theme="anime"] on <html>
+   ══════════════════════════════════════════════════════════ */
+
+/* Sparkle keyframes */
+@keyframes anime-sparkle {
+  0%, 100% { opacity: 0; transform: scale(0) rotate(0deg); }
+  50% { opacity: 1; transform: scale(1) rotate(180deg); }
+}
+@keyframes anime-float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
+}
+@keyframes anime-glow-pulse {
+  0%, 100% { box-shadow: 0 0 8px hsl(var(--primary) / 0.3), 0 0 24px hsl(var(--primary) / 0.1); }
+  50% { box-shadow: 0 0 16px hsl(var(--primary) / 0.5), 0 0 48px hsl(var(--primary) / 0.2); }
+}
+@keyframes anime-border-glow {
+  0%, 100% { border-color: hsl(var(--primary) / 0.3); }
+  50% { border-color: hsl(var(--primary) / 0.7); }
+}
+@keyframes anime-bg-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+[data-theme="anime"] {
+  /* ── Global overrides ── */
+  --radius: 1.25rem;
+}
+
+/* Body background — anime gradient sky */
+[data-theme="anime"] body {
+  background-image:
+    radial-gradient(ellipse at 10% 0%, hsl(300 80% 60% / 0.1) 0%, transparent 50%),
+    radial-gradient(ellipse at 90% 20%, hsl(200 90% 60% / 0.08) 0%, transparent 40%),
+    radial-gradient(ellipse at 50% 100%, hsl(330 85% 55% / 0.06) 0%, transparent 50%) !important;
+  background-attachment: fixed;
+}
+
+/* ── Cards & panels — soft glow borders ── */
+[data-theme="anime"] .glass-card,
+[data-theme="anime"] .glass {
+  background: hsl(var(--card) / 0.7);
+  backdrop-filter: blur(20px) saturate(1.5);
+  -webkit-backdrop-filter: blur(20px) saturate(1.5);
+  border: 1.5px solid hsl(var(--primary) / 0.2);
+  box-shadow:
+    0 0 12px hsl(var(--primary) / 0.08),
+    0 4px 24px hsl(0 0% 0% / 0.2),
+    inset 0 1px 0 hsl(0 0% 100% / 0.05);
+  animation: anime-border-glow 4s ease-in-out infinite;
+}
+
+/* ── Buttons — kawaii gradient with glow ── */
+[data-theme="anime"] .btn-primary,
+[data-theme="anime"] button[class*="bg-gradient-to-r from-primary"] {
+  background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)), hsl(var(--primary))) !important;
+  background-size: 200% 200% !important;
+  animation: anime-bg-shift 3s ease infinite;
+  box-shadow: 0 4px 20px hsl(var(--primary) / 0.4), 0 0 40px hsl(var(--primary) / 0.15);
+  border-radius: 9999px !important;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+}
+[data-theme="anime"] .btn-primary:hover,
+[data-theme="anime"] button[class*="bg-gradient-to-r from-primary"]:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 32px hsl(var(--primary) / 0.5), 0 0 60px hsl(var(--primary) / 0.2);
+}
+
+/* ── All rounded elements — extra round ── */
+[data-theme="anime"] input,
+[data-theme="anime"] [class*="rounded-xl"],
+[data-theme="anime"] [class*="rounded-lg"] {
+  border-radius: 1.25rem !important;
+}
+[data-theme="anime"] [class*="rounded-2xl"] {
+  border-radius: 1.5rem !important;
+}
+
+/* ── Chat bubbles — soft kawaii style ── */
+[data-theme="anime"] .chat-bubble-own,
+[data-theme="anime"] [class*="bg-primary"][class*="rounded"] {
+  border-radius: 24px 24px 6px 24px !important;
+  box-shadow: 0 2px 16px hsl(var(--primary) / 0.3), 0 0 32px hsl(var(--primary) / 0.1);
+}
+[data-theme="anime"] .chat-bubble-other {
+  border-radius: 24px 24px 24px 6px !important;
+  border: 1.5px solid hsl(var(--primary) / 0.15);
+  box-shadow: 0 2px 12px hsl(0 0% 0% / 0.15);
+}
+
+/* ── Avatars — anime glow ring ── */
+[data-theme="anime"] [class*="rounded-2xl"][class*="bg-gradient-to-br"][class*="shadow-lg"] {
+  animation: anime-glow-pulse 3s ease-in-out infinite;
+  border-radius: 1rem !important;
+}
+
+/* ── Sidebar / chat list items — hover glow ── */
+[data-theme="anime"] button[class*="hover:bg-muted"]:hover,
+[data-theme="anime"] button[class*="hover:bg-chat-hover"]:hover {
+  background: hsl(var(--primary) / 0.08) !important;
+  box-shadow: inset 0 0 20px hsl(var(--primary) / 0.05);
+}
+
+/* ── Active chat — anime highlight ── */
+[data-theme="anime"] [class*="bg-chat-active"] {
+  background: linear-gradient(135deg, hsl(var(--primary) / 0.2), hsl(var(--accent) / 0.15)) !important;
+  border-left: 3px solid hsl(var(--primary));
+  box-shadow: inset 0 0 24px hsl(var(--primary) / 0.08);
+}
+
+/* ── Unread badge — pulsing anime badge ── */
+[data-theme="anime"] [class*="bg-gradient-to-r from-primary to-accent"][class*="rounded-full"][class*="text-white"] {
+  animation: anime-glow-pulse 2s ease-in-out infinite;
+}
+
+/* ── Tab indicator — thicker gradient ── */
+[data-theme="anime"] [class*="bg-gradient-to-r from-primary to-accent"][class*="h-[2.5px]"] {
+  height: 3px !important;
+  border-radius: 3px;
+  box-shadow: 0 0 8px hsl(var(--primary) / 0.5);
+}
+
+/* ── Scrollbar — anime colored ── */
+[data-theme="anime"] ::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, hsl(var(--primary) / 0.4), hsl(var(--accent) / 0.3)) !important;
+  border-radius: 10px;
+}
+
+/* ── Text gradient — anime multi-color ── */
+[data-theme="anime"] .text-gradient {
+  background: linear-gradient(135deg, hsl(330 85% 65%), hsl(280 80% 65%), hsl(200 85% 60%)) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+}
+
+/* ── Glow effects — stronger ── */
+[data-theme="anime"] .glow-primary {
+  box-shadow: 0 0 30px hsl(var(--primary) / 0.4), 0 0 80px hsl(var(--primary) / 0.15), 0 0 120px hsl(var(--accent) / 0.08) !important;
+}
+
+/* ── Input focus — anime ring ── */
+[data-theme="anime"] input:focus {
+  box-shadow: 0 0 0 3px hsl(var(--primary) / 0.2), 0 0 16px hsl(var(--primary) / 0.15) !important;
+  border-color: hsl(var(--primary) / 0.5) !important;
+}
+
+/* ── Menu dropdown — anime glass ── */
+[data-theme="anime"] [class*="shadow-2xl"][class*="rounded-2xl"] {
+  box-shadow:
+    0 8px 40px hsl(0 0% 0% / 0.3),
+    0 0 20px hsl(var(--primary) / 0.1),
+    inset 0 1px 0 hsl(0 0% 100% / 0.06) !important;
+  border: 1.5px solid hsl(var(--primary) / 0.2);
+}
+
+/* ── Gradient icon boxes in menu — anime sparkle ── */
+[data-theme="anime"] [class*="from-"][class*="to-"][class*="shadow-lg"][class*="rounded-xl"] {
+  box-shadow: 0 0 12px currentColor;
+  animation: anime-float 3s ease-in-out infinite;
+}
+[data-theme="anime"] [class*="from-blue-500"] { animation-delay: 0s; }
+[data-theme="anime"] [class*="from-violet-500"] { animation-delay: 0.3s; }
+[data-theme="anime"] [class*="from-amber-500"] { animation-delay: 0.6s; }
+[data-theme="anime"] [class*="from-emerald-500"] { animation-delay: 0.9s; }
+[data-theme="anime"] [class*="from-rose-500"] { animation-delay: 1.2s; }
+
+/* ── Selection — anime pink ── */
+[data-theme="anime"] ::selection {
+  background: hsl(330 80% 55% / 0.35) !important;
+  color: white !important;
+}
