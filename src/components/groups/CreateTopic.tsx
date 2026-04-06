@@ -41,7 +41,7 @@ export function CreateTopic({ groupId, onBack, onCreated }: CreateTopicProps) {
       animate={{ x: 0 }}
       exit={{ x: '100%' }}
       transition={{ type: 'tween', duration: 0.25 }}
-      className="absolute inset-0 z-50 bg-card flex flex-col"
+      className="absolute inset-0 z-50 bg-card/90 backdrop-blur-md flex flex-col"
     >
       {/* Header */}
       <div className="flex items-center gap-3 px-4 py-3 border-b border-border">
