@@ -5,6 +5,7 @@ import { Avatar } from './Avatar';
 import { EmojiPicker } from './EmojiPicker';
 import { messages, users, chats as defaultChats, type Message, type Chat } from '@/data/mockData';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import { getFontSizeClass, getBubbleClasses, getBackgroundClass } from '@/components/settings/AppearanceSettings';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -36,6 +37,7 @@ export function ChatWindow({
   const allChats = [...defaultChats, ...extraChats];
   const chat = allChats.find(c => c.id === chatId);
   const { appearance } = useAuth();
+  const { headerClass, iconAnimClass, surfaceClass } = useTheme();
   const bubbleCls = getBubbleClasses(appearance.bubbleStyle);
   const fontCls = getFontSizeClass(appearance.fontSize);
   const bgCls = getBackgroundClass(appearance.chatBackground);
@@ -106,8 +108,8 @@ export function ChatWindow({
 
   return (
     <div className={cn('flex flex-col h-full bg-chat-bg', bgCls)}>
-      {/* Header */}
-      <div className="flex items-center gap-3 px-4 py-3 bg-card border-b border-border">
+      {/* Header — themed */}
+      <div className={cn('flex items-center gap-3 px-4 py-3 border-b border-border', headerClass)}>
         {onBack && (
           <button onClick={onBack} className="p-1 hover:bg-muted rounded-lg transition-colors mr-1">
             <ArrowLeft className="w-5 h-5 text-muted-foreground" />
@@ -120,12 +122,12 @@ export function ChatWindow({
         >
           {isTopic ? (
             <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center flex-shrink-0 text-lg">
-              {topicIcon || <Hash className="w-5 h-5 text-muted-foreground" />}
+              {topicIcon || <Hash className={cn('w-5 h-5 text-muted-foreground', iconAnimClass)} />}
             </div>
           ) : isGroup ? (
             <div className="relative flex-shrink-0">
               <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                <UsersRound className="w-5 h-5 text-primary" />
+                <UsersRound className={cn('w-5 h-5 text-primary', iconAnimClass)} />
               </div>
             </div>
           ) : (
@@ -142,11 +144,11 @@ export function ChatWindow({
         <div className="flex items-center gap-1">
           {!isGroup && !isTopic && (
             <button className="p-2 hover:bg-muted rounded-lg transition-colors">
-              <PhoneCall className="w-4 h-4 text-muted-foreground" />
+              <PhoneCall className={cn('w-4 h-4 text-muted-foreground', iconAnimClass)} />
             </button>
           )}
           <button className="p-2 hover:bg-muted rounded-lg transition-colors">
-            <Ellipsis className="w-4 h-4 text-muted-foreground" />
+            <Ellipsis className={cn('w-4 h-4 text-muted-foreground', iconAnimClass)} />
           </button>
         </div>
       </div>
@@ -201,11 +203,11 @@ export function ChatWindow({
         })}
       </div>
 
-      {/* Input */}
-      <div className="px-4 py-3 bg-card border-t border-border">
+      {/* Input — themed */}
+      <div className={cn('px-4 py-3 border-t border-border', surfaceClass)}>
         <div className="flex items-center gap-2">
           <button className="p-2 hover:bg-muted rounded-lg transition-colors">
-            <Link2 className="w-5 h-5 text-muted-foreground" />
+            <Link2 className={cn('w-5 h-5 text-muted-foreground', iconAnimClass)} />
           </button>
           <div className="flex-1 relative">
             <input
@@ -222,7 +224,7 @@ export function ChatWindow({
               onClick={() => setShowEmoji(!showEmoji)}
               className={cn('p-2 rounded-lg transition-colors', showEmoji ? 'bg-primary/10 text-primary' : 'hover:bg-muted text-muted-foreground')}
             >
-              <Smile className="w-5 h-5" />
+              <Smile className={cn('w-5 h-5', iconAnimClass)} />
             </button>
             <AnimatePresence>
               {showEmoji && (
@@ -241,7 +243,7 @@ export function ChatWindow({
               input.trim() ? 'bg-primary text-primary-foreground hover:bg-primary/90' : 'text-muted-foreground',
             )}
           >
-            <SendHorizontal className="w-5 h-5" />
+            <SendHorizontal className={cn('w-5 h-5', iconAnimClass)} />
           </button>
         </div>
       </div>

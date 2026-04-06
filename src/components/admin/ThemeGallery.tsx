@@ -15,6 +15,7 @@ import {
   type LayoutModifier,
 } from '@/data/themePresets';
 import { type AppearanceConfig, getThemeCSSVars, applyAppearanceToDOM, getBubbleClasses, getFontSizeClass, getBackgroundClass } from '@/components/settings/AppearanceSettings';
+import { useSetTheme } from '@/contexts/ThemeContext';
 import { motion } from 'framer-motion';
 
 interface ThemeGalleryProps {
@@ -149,6 +150,7 @@ function PreviewCard({ preset, isActive, onApply, onRandomize }: {
 export function ThemeGallery({ currentConfig, onBack, onApply }: ThemeGalleryProps) {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [search, setSearch] = useState('');
+  const setThemePreset = useSetTheme();
 
   const filtered = THEME_PRESETS.filter(p =>
     p.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -158,6 +160,7 @@ export function ThemeGallery({ currentConfig, onBack, onApply }: ThemeGalleryPro
   const handleApply = (preset: ThemePreset) => {
     const cssVars = { ...getThemeCSSVars(preset.config), ...preset.cssOverrides };
     setActiveId(preset.id);
+    setThemePreset(preset.id);
     const layout = preset.layoutVariants[0];
     onApply(preset.config, cssVars, layout, preset.modifiers);
   };
@@ -170,6 +173,7 @@ export function ThemeGallery({ currentConfig, onBack, onApply }: ThemeGalleryPro
     const varCss = getVariationCSSOverrides(variation, baseHue);
     const cssVars = { ...getThemeCSSVars(variedConfig), ...preset.cssOverrides, ...varCss };
     setActiveId(preset.id);
+    setThemePreset(preset.id);
     const layout = preset.layoutVariants.find(lv => lv.id === variation.layoutVariantId) || preset.layoutVariants[0];
     onApply(variedConfig, cssVars, layout, variation.activeModifiers);
   };
