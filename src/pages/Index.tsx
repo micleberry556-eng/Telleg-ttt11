@@ -17,7 +17,7 @@ import { ChannelInfo } from '@/components/channels/ChannelInfo';
 import { CreatePost } from '@/components/channels/CreatePost';
 import { ChannelPrivacyPage } from '@/components/channels/ChannelPrivacyPage';
 import { PrivacySettingsPage } from '@/components/settings/PrivacySettings';
-import { AppearanceSettings, type AppearanceConfig, applyAppearanceToDOM, getThemeCSSVars } from '@/components/settings/AppearanceSettings';
+import { AppearanceSettings } from '@/components/settings/AppearanceSettings';
 import { FolderManager } from '@/components/folders/FolderManager';
 import { FolderEditor } from '@/components/folders/FolderEditor';
 import { StoriesBar } from '@/components/stories/StoriesBar';
