@@ -1,108 +1,65 @@
-import { createContext, useContext, useState, type ReactNode } from 'react';
-import {
-  THEME_PRESETS,
-  getSurfaceClass,
-  getHeaderClass,
-  getIconAnimClass,
-  type ThemePreset,
-  type SurfaceStyle,
-  type ThemeHeaderStyle,
-  type IconAnimation,
-} from '@/data/themePresets';
-
-/**
- * Resolved theme values ready for use by any component.
- * Components read these instead of raw CSS variables.
- */
-export interface ResolvedTheme {
-  /** The full preset object (null = default, no preset active). */
-  preset: ThemePreset | null;
-
-  /* ── CSS class helpers ── */
-  surfaceClass: string;
-  headerClass: string;
-  iconAnimClass: string;
-
-  /* ── Raw values for conditional logic ── */
-  surfaceStyle: SurfaceStyle;
-  headerStyle: ThemeHeaderStyle;
-  iconAnimation: IconAnimation;
-}
+import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import { THEMES, type FullTheme } from '@/data/themePresets';
 
 interface ThemeContextValue {
-  theme: ResolvedTheme;
-  setActivePresetId: (id: string | null) => void;
+  theme: FullTheme | null;
+  themeId: string | null;
+  setThemeId: (id: string | null) => void;
 }
-
-const DEFAULT_RESOLVED: ResolvedTheme = {
-  preset: null,
-  surfaceClass: 'glass-card',
-  headerClass: 'glass',
-  iconAnimClass: '',
-  surfaceStyle: 'glass',
-  headerStyle: 'glass',
-  iconAnimation: 'none',
-};
 
 const ThemeContext = createContext<ThemeContextValue>({
-  theme: DEFAULT_RESOLVED,
-  setActivePresetId: () => {},
+  theme: null,
+  themeId: null,
+  setThemeId: () => {},
 });
 
-function resolve(preset: ThemePreset | null): ResolvedTheme {
-  if (!preset) return DEFAULT_RESOLVED;
-  return {
-    preset,
-    surfaceClass: getSurfaceClass(preset.surfaceStyle),
-    headerClass: getHeaderClass(preset.headerStyle),
-    iconAnimClass: getIconAnimClass(preset.iconAnimation),
-    surfaceStyle: preset.surfaceStyle,
-    headerStyle: preset.headerStyle,
-    iconAnimation: preset.iconAnimation,
-  };
+const STORAGE_KEY = 'telleg_theme_id';
+
+function loadId(): string | null {
+  try { return localStorage.getItem(STORAGE_KEY); } catch { return null; }
+}
+function saveId(id: string | null) {
+  try { if (id) localStorage.setItem(STORAGE_KEY, id); else localStorage.removeItem(STORAGE_KEY); } catch { /* */ }
 }
 
-const STORAGE_KEY = 'telleg_active_theme';
-
-function loadPresetId(): string | null {
-  try {
-    return localStorage.getItem(STORAGE_KEY);
-  } catch {
-    return null;
+/** Apply a theme's CSS variables, font, and body background to the document. */
+function applyTheme(theme: FullTheme | null) {
+  const root = document.documentElement;
+  if (!theme) {
+    // Reset to defaults — remove all inline styles set by themes.
+    root.removeAttribute('style');
+    document.body.style.backgroundImage = '';
+    return;
   }
-}
-
-function savePresetId(id: string | null) {
-  try {
-    if (id) localStorage.setItem(STORAGE_KEY, id);
-    else localStorage.removeItem(STORAGE_KEY);
-  } catch { /* ignore */ }
+  for (const [key, value] of Object.entries(theme.vars)) {
+    root.style.setProperty(key, value);
+  }
+  root.style.fontFamily = theme.font;
+  document.body.style.backgroundImage = theme.bodyBg;
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [presetId, setPresetId] = useState<string | null>(() => loadPresetId());
+  const [themeId, setThemeIdState] = useState<string | null>(() => loadId());
+  const theme = themeId ? THEMES.find(t => t.id === themeId) ?? null : null;
 
-  const preset = presetId ? THEME_PRESETS.find(p => p.id === presetId) ?? null : null;
-  const theme = resolve(preset);
-
-  const setActivePresetId = (id: string | null) => {
-    setPresetId(id);
-    savePresetId(id);
+  const setThemeId = (id: string | null) => {
+    setThemeIdState(id);
+    saveId(id);
   };
 
+  // Apply theme on mount and whenever it changes.
+  useEffect(() => {
+    applyTheme(theme);
+  }, [theme]);
+
   return (
-    <ThemeContext.Provider value={{ theme, setActivePresetId }}>
+    <ThemeContext.Provider value={{ theme, themeId, setThemeId }}>
       {children}
     </ThemeContext.Provider>
   );
 }
 
-/** Hook to read the current resolved theme. */
-export function useTheme(): ResolvedTheme {
-  return useContext(ThemeContext).theme;
-}
-
-/** Hook to change the active theme preset. */
-export function useSetTheme(): (id: string | null) => void {
-  return useContext(ThemeContext).setActivePresetId;
+/** Read the active theme (null = default). */
+export function useTheme() {
+  return useContext(ThemeContext);
 }

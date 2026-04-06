@@ -24,7 +24,6 @@ import { StoriesBar } from '@/components/stories/StoriesBar';
 import { StoryViewer } from '@/components/stories/StoryViewer';
 import { CreateStory } from '@/components/stories/CreateStory';
 import { ThemeGallery } from '@/components/admin/ThemeGallery';
-import { type LayoutVariant, type LayoutModifier, getModifierClasses } from '@/data/themePresets';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -88,8 +87,6 @@ const Index = () => {
   const [stories, setStories] = useState<UserStory[]>(defaultStories);
   const [myStory, setMyStory] = useState<UserStory>({ userId: 'me', items: [], viewedIds: [] });
   const [viewingStoryUserId, setViewingStoryUserId] = useState<string | null>(null);
-  const [activeLayout, setActiveLayout] = useState<LayoutVariant | null>(null);
-  const [activeModifiers, setActiveModifiers] = useState<LayoutModifier[]>([]);
   const isMobile = useIsMobile();
 
   // On mobile: show sidebar when nothing is actively open, OR when viewing topic list.
@@ -322,22 +319,6 @@ const Index = () => {
     setView('chat');
   };
 
-  const handleApplyTheme = (config: AppearanceConfig, cssOverrides: Record<string, string>, layout?: LayoutVariant, modifiers?: LayoutModifier[]) => {
-    // Apply the config to state (persists to localStorage via AuthContext).
-    updateAppearance(config);
-    // Apply CSS variables to :root.
-    const root = document.documentElement;
-    const themeVars = getThemeCSSVars(config);
-    for (const [key, value] of Object.entries({ ...themeVars, ...cssOverrides })) {
-      root.style.setProperty(key, value);
-    }
-    // Apply font, animations, etc.
-    applyAppearanceToDOM(config);
-    // Apply layout and modifiers.
-    if (layout) setActiveLayout(layout);
-    if (modifiers) setActiveModifiers(modifiers);
-  };
-
   const handleBack = () => {
     if (activeTopicId) {
       setActiveTopicId(null);
@@ -441,22 +422,15 @@ const Index = () => {
     return <EmptyChat />;
   };
 
-  // Layout variant classes.
-  const layoutRoot = activeLayout?.rootClass || 'flex-row';
-  const layoutSidebarW = activeLayout?.sidebarWidth || 'w-80 xl:w-96';
-  const layoutSidebarCls = activeLayout?.sidebarClass || '';
-  const layoutContentCls = activeLayout?.contentClass || '';
-  const modCls = getModifierClasses(activeModifiers);
-
   return (
-    <div className={cn('h-screen flex overflow-hidden relative', !isMobile && layoutRoot, modCls.root)}>
+    <div className={cn('h-screen flex overflow-hidden relative', !isMobile && 'flex-row')}>
       {showSidebar && (
-        <div className={cn(isMobile ? 'w-full' : cn(layoutSidebarW, 'flex-shrink-0'), layoutSidebarCls, modCls.sidebar)}>
+        <div className={cn(isMobile ? 'w-full' : 'w-80 xl:w-96 flex-shrink-0')}>
           {renderSidebar()}
         </div>
       )}
       {showContent && (
-        <div className={cn('flex-1 min-w-0', layoutContentCls, modCls.content)}>
+        <div className="flex-1 min-w-0">
           {renderContent()}
         </div>
       )}
@@ -585,9 +559,7 @@ const Index = () => {
         )}
         {view === 'theme-gallery' && (
           <ThemeGallery
-            currentConfig={appearance}
-            onBack={() => setView('appearance')}
-            onApply={handleApplyTheme}
+            onBack={() => setView('chat')}
           />
         )}
       </AnimatePresence>

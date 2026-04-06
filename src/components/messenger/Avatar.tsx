@@ -1,5 +1,4 @@
 import { cn } from '@/lib/utils';
-import { useTheme } from '@/contexts/ThemeContext';
 
 interface AvatarProps {
   name: string;
@@ -72,8 +71,6 @@ function getGlow(name: string) {
 }
 
 export function Avatar({ name, size = 'md', online }: AvatarProps) {
-  const { iconAnimClass } = useTheme();
-
   return (
     <div className="relative flex-shrink-0">
       {/* Outer glow ring */}
@@ -89,7 +86,7 @@ export function Avatar({ name, size = 'md', online }: AvatarProps) {
             'rounded-[14px] flex items-center justify-center font-bold text-white bg-gradient-to-br ring-2 ring-card',
             getGradient(name),
             sizeClasses[size],
-            iconAnimClass,
+
           )}
         >
           {getInitials(name)}
