@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { Search, LayoutGrid, SlidersHorizontal, UsersRound, Zap, Plus, Radio, FolderOpen } from 'lucide-react';
+import { Search, LayoutGrid, SlidersHorizontal, UsersRound, Zap, Plus, Radio, FolderOpen, Shield } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Avatar } from './Avatar';
 import { chats as defaultChats, users, type Chat, type Channel, type ChatFolder } from '@/data/mockData';
+import { useTheme } from '@/contexts/ThemeContext';
 import { motion, AnimatePresence } from 'framer-motion';
 
 type Tab = 'chats' | 'groups' | 'channels';
@@ -62,6 +63,7 @@ export function ChatList({
   const [menuOpen, setMenuOpen] = useState(false);
   const [tab, setTab] = useState<Tab>('chats');
   const [activeFolderId, setActiveFolderId] = useState<string | null>(null);
+  const { surfaceClass, headerClass, iconAnimClass } = useTheme();
 
   const allChats = [...defaultChats, ...extraChats];
   const activeFolder = activeFolderId ? folders.find(f => f.id === activeFolderId) : null;
@@ -99,24 +101,18 @@ export function ChatList({
   ];
 
   const visibleTabs = tabs.filter(t => t.visible);
-
-  // Reset tab if current tab is hidden by folder filter.
-  if (!visibleTabs.find(t => t.key === tab)) {
-    // This is a render-time side effect, but safe since it only happens on folder change.
-    // We handle it by checking in the render.
-  }
   const effectiveTab = visibleTabs.find(t => t.key === tab) ? tab : 'chats';
 
   return (
     <div className="flex flex-col h-full bg-card border-r border-border">
-      {/* Header */}
-      <div className="p-3 flex items-center gap-2 border-b border-border">
+      {/* Header — uses theme header style */}
+      <div className={cn('p-3 flex items-center gap-2 border-b border-border', headerClass)}>
         <div className="relative">
           <button
             onClick={() => setMenuOpen(!menuOpen)}
             className="p-2 rounded-lg hover:bg-muted transition-colors"
           >
-            <LayoutGrid className="w-5 h-5 text-muted-foreground" />
+            <LayoutGrid className={cn('w-5 h-5 text-muted-foreground', iconAnimClass)} />
           </button>
           <AnimatePresence>
             {menuOpen && (
@@ -124,41 +120,41 @@ export function ChatList({
                 initial={{ opacity: 0, scale: 0.95, y: -4 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: -4 }}
-                className="absolute left-0 top-full mt-1 z-50 w-56 bg-popover border border-border rounded-xl shadow-xl overflow-hidden"
+                className={cn('absolute left-0 top-full mt-1 z-50 w-56 rounded-xl shadow-xl overflow-hidden', surfaceClass)}
               >
                 <button
                   onClick={() => { onCreateGroup(); setMenuOpen(false); }}
                   className="flex items-center gap-3 w-full px-4 py-3 text-sm hover:bg-muted transition-colors text-foreground"
                 >
-                  <Plus className="w-4 h-4 text-muted-foreground" />
+                  <Plus className={cn('w-4 h-4 text-primary', iconAnimClass)} />
                   Новая группа
                 </button>
                 <button
                   onClick={() => { onCreateChannel(); setMenuOpen(false); }}
                   className="flex items-center gap-3 w-full px-4 py-3 text-sm hover:bg-muted transition-colors text-foreground"
                 >
-                  <Radio className="w-4 h-4 text-muted-foreground" />
+                  <Radio className={cn('w-4 h-4 text-primary', iconAnimClass)} />
                   Новый канал
                 </button>
                 <button
                   onClick={() => { onManageFolders(); setMenuOpen(false); }}
                   className="flex items-center gap-3 w-full px-4 py-3 text-sm hover:bg-muted transition-colors text-foreground"
                 >
-                  <FolderOpen className="w-4 h-4 text-muted-foreground" />
+                  <FolderOpen className={cn('w-4 h-4 text-primary', iconAnimClass)} />
                   Папки чатов
                 </button>
                 <button
                   onClick={() => { onOpenSettings(); setMenuOpen(false); }}
                   className="flex items-center gap-3 w-full px-4 py-3 text-sm hover:bg-muted transition-colors text-foreground"
                 >
-                  <SlidersHorizontal className="w-4 h-4 text-muted-foreground" />
+                  <SlidersHorizontal className={cn('w-4 h-4 text-primary', iconAnimClass)} />
                   Настройки
                 </button>
                 <button
                   onClick={() => { onOpenAdmin(); setMenuOpen(false); }}
                   className="flex items-center gap-3 w-full px-4 py-3 text-sm hover:bg-muted transition-colors text-foreground"
                 >
-                  <UsersRound className="w-4 h-4 text-muted-foreground" />
+                  <Shield className={cn('w-4 h-4 text-primary', iconAnimClass)} />
                   Админ-панель
                 </button>
               </motion.div>
@@ -166,7 +162,7 @@ export function ChatList({
           </AnimatePresence>
         </div>
         <div className="flex-1 relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Search className={cn('absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground', iconAnimClass)} />
           <input
             type="text"
             placeholder="Поиск..."
@@ -240,7 +236,7 @@ export function ChatList({
               className="w-full flex items-center gap-3 px-3 py-3 hover:bg-chat-hover transition-colors text-left border-b border-border/50"
             >
               <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                <Plus className="w-6 h-6 text-primary" />
+                <Plus className={cn('w-6 h-6 text-primary', iconAnimClass)} />
               </div>
               <div>
                 <p className="text-sm font-medium text-primary">Создать канал</p>
@@ -261,7 +257,7 @@ export function ChatList({
                 >
                   <div className="relative flex-shrink-0">
                     <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                      <Radio className="w-6 h-6 text-primary" />
+                      <Radio className={cn('w-6 h-6 text-primary', iconAnimClass)} />
                     </div>
                   </div>
                   <div className="flex-1 min-w-0">
@@ -285,7 +281,7 @@ export function ChatList({
 
             {visibleChannels.length === 0 && (
               <div className="flex flex-col items-center justify-center h-40 text-muted-foreground">
-                <Radio className="w-8 h-8 mb-2 opacity-50" />
+                <Radio className={cn('w-8 h-8 mb-2 opacity-50', iconAnimClass)} />
                 <p className="text-sm">Каналов пока нет</p>
               </div>
             )}
@@ -299,7 +295,7 @@ export function ChatList({
             className="w-full flex items-center gap-3 px-3 py-3 hover:bg-chat-hover transition-colors text-left border-b border-border/50"
           >
             <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-              <Plus className="w-6 h-6 text-primary" />
+              <Plus className={cn('w-6 h-6 text-primary', iconAnimClass)} />
             </div>
             <div>
               <p className="text-sm font-medium text-primary">Создать группу</p>
@@ -330,7 +326,7 @@ export function ChatList({
                   {isGroup ? (
                     <div className="relative flex-shrink-0">
                       <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                        <UsersRound className="w-6 h-6 text-primary" />
+                        <UsersRound className={cn('w-6 h-6 text-primary', iconAnimClass)} />
                       </div>
                     </div>
                   ) : (
@@ -374,12 +370,12 @@ export function ChatList({
               <div className="flex flex-col items-center justify-center h-40 text-muted-foreground">
                 {effectiveTab === 'groups' ? (
                   <>
-                    <UsersRound className="w-8 h-8 mb-2 opacity-50" />
+                    <UsersRound className={cn('w-8 h-8 mb-2 opacity-50', iconAnimClass)} />
                     <p className="text-sm">Групп пока нет</p>
                   </>
                 ) : (
                   <>
-                    <Zap className="w-8 h-8 mb-2 opacity-50" />
+                    <Zap className={cn('w-8 h-8 mb-2 opacity-50', iconAnimClass)} />
                     <p className="text-sm">Чаты не найдены</p>
                   </>
                 )}
