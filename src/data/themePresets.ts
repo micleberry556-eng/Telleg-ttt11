@@ -22,13 +22,15 @@ export interface FullTheme {
   bubbleOther: string;
   /** Extra body background (gradient, pattern, etc.). */
   bodyBg: string;
+  /** Background-size for repeating patterns. */
+  bgSize?: string;
 }
 
 /** Helper to build a theme with sensible defaults. */
 function t(
   id: string, name: string, desc: string, emoji: string,
   hue: number, vars: Record<string, string>,
-  opts?: Partial<Pick<FullTheme, 'font' | 'radius' | 'bubbleOwn' | 'bubbleOther' | 'bodyBg'>>,
+  opts?: Partial<Pick<FullTheme, 'font' | 'radius' | 'bubbleOwn' | 'bubbleOther' | 'bodyBg' | 'bgSize'>>,
 ): FullTheme {
   const h = String(hue);
   const base: Record<string, string> = {
@@ -81,21 +83,22 @@ function t(
     radius: opts?.radius || '1rem',
     bubbleOwn: opts?.bubbleOwn || '20px 20px 4px 20px',
     bubbleOther: opts?.bubbleOther || '20px 20px 20px 4px',
-    bodyBg: opts?.bodyBg || `radial-gradient(ellipse at 15% 0%, hsl(${h} 80% 55% / 0.06) 0%, transparent 50%), radial-gradient(ellipse at 85% 100%, hsl(${(hue + 60) % 360} 70% 50% / 0.04) 0%, transparent 50%)`,
+    bodyBg: opts?.bodyBg || `radial-gradient(ellipse at 15% 0%, hsl(${h} 80% 55% / 0.21) 0%, transparent 50%), radial-gradient(ellipse at 85% 100%, hsl(${(hue + 60) % 360} 70% 50% / 0.35) 0%, transparent 50%)`,
+    bgSize: opts?.bgSize,
   };
 }
 
 export const THEMES: FullTheme[] = [
   // 1 — Midnight Violet — starfield dots
   t('midnight-violet', 'Полночный фиолет', 'Глубокий фиолетовый с мягким свечением', '🌌', 262, {}, {
-    bodyBg: 'radial-gradient(1.5px 1.5px at 20px 30px, hsl(262 60% 60% / 0.15), transparent), radial-gradient(1px 1px at 60px 80px, hsl(280 50% 55% / 0.12), transparent), radial-gradient(1.5px 1.5px at 100px 40px, hsl(262 60% 60% / 0.1), transparent), radial-gradient(ellipse at 15% 0%, hsl(262 80% 55% / 0.07) 0%, transparent 50%), radial-gradient(ellipse at 85% 100%, hsl(322 70% 50% / 0.05) 0%, transparent 50%)',
+    bodyBg: 'radial-gradient(1.5px 1.5px at 20px 30px, hsl(262 60% 60% / 0.38), transparent), radial-gradient(1px 1px at 60px 80px, hsl(280 50% 55% / 0.30), transparent), radial-gradient(1.5px 1.5px at 100px 40px, hsl(262 60% 60% / 0.1), transparent), radial-gradient(ellipse at 15% 0%, hsl(262 80% 55% / 0.25) 0%, transparent 50%), radial-gradient(ellipse at 85% 100%, hsl(322 70% 50% / 0.18) 0%, transparent 50%)',
   }),
 
   // 2 — Ocean Depths — wave lines
   t('ocean-depths', 'Глубины океана', 'Спокойный тёмно-синий как морская бездна', '🌊', 215, {
     '--background': '215 25% 7%', '--card': '215 20% 10%', '--muted': '215 15% 15%',
   }, { font: "'Inter', system-ui, sans-serif", bubbleOwn: '18px 18px 4px 18px', bubbleOther: '18px 18px 18px 4px',
-    bodyBg: 'repeating-linear-gradient(0deg, transparent, transparent 60px, hsl(215 40% 30% / 0.04) 60px, hsl(215 40% 30% / 0.04) 61px), repeating-linear-gradient(90deg, transparent, transparent 80px, hsl(215 40% 30% / 0.03) 80px, hsl(215 40% 30% / 0.03) 81px), radial-gradient(ellipse at 50% 100%, hsl(215 60% 40% / 0.08) 0%, transparent 60%)',
+    bodyBg: 'repeating-linear-gradient(0deg, transparent, transparent 60px, hsl(215 40% 30% / 0.35) 60px, hsl(215 40% 30% / 0.35) 61px), repeating-linear-gradient(90deg, transparent, transparent 80px, hsl(215 40% 30% / 0.25) 80px, hsl(215 40% 30% / 0.25) 81px), radial-gradient(ellipse at 50% 100%, hsl(215 60% 40% / 0.28) 0%, transparent 60%)',
   }),
 
   // 3 — Emerald Garden — leaf pattern
@@ -104,7 +107,7 @@ export const THEMES: FullTheme[] = [
     '--accent': '155 70% 45%', '--ring': '155 70% 45%', '--chat-bubble-own': '155 70% 45%',
     '--sidebar-primary': '155 70% 45%', '--sidebar-ring': '155 70% 45%',
   }, { font: "'Roboto', system-ui, sans-serif", radius: '0.75rem',
-    bodyBg: 'radial-gradient(circle at 20% 80%, hsl(155 50% 35% / 0.08) 0%, transparent 40%), radial-gradient(circle at 80% 20%, hsl(140 45% 30% / 0.06) 0%, transparent 35%), radial-gradient(circle at 50% 50%, hsl(155 40% 25% / 0.04) 0%, transparent 50%)',
+    bodyBg: 'radial-gradient(circle at 20% 80%, hsl(155 50% 35% / 0.28) 0%, transparent 40%), radial-gradient(circle at 80% 20%, hsl(140 45% 30% / 0.21) 0%, transparent 35%), radial-gradient(circle at 50% 50%, hsl(155 40% 25% / 0.35) 0%, transparent 50%)',
   }),
 
   // 4 — Sakura Bloom — petal dots
@@ -114,7 +117,7 @@ export const THEMES: FullTheme[] = [
     '--sidebar-primary': '335 75% 60%', '--sidebar-ring': '335 75% 60%',
     '--muted-foreground': '335 10% 55%',
   }, { font: "'Montserrat', system-ui, sans-serif", radius: '1.25rem', bubbleOwn: '24px', bubbleOther: '24px',
-    bodyBg: 'radial-gradient(8px 8px at 15% 25%, hsl(335 60% 60% / 0.06), transparent 50%), radial-gradient(6px 6px at 75% 15%, hsl(335 55% 55% / 0.05), transparent 50%), radial-gradient(10px 10px at 45% 85%, hsl(335 50% 50% / 0.04), transparent 50%), radial-gradient(7px 7px at 85% 65%, hsl(340 55% 55% / 0.05), transparent 50%)',
+    bodyBg: 'radial-gradient(8px 8px at 15% 25%, hsl(335 60% 60% / 0.21), transparent 50%), radial-gradient(6px 6px at 75% 15%, hsl(335 55% 55% / 0.18), transparent 50%), radial-gradient(10px 10px at 45% 85%, hsl(335 50% 50% / 0.35), transparent 50%), radial-gradient(7px 7px at 85% 65%, hsl(340 55% 55% / 0.18), transparent 50%)',
   }),
 
   // 5 — Sunset Amber — horizon gradient
@@ -123,7 +126,7 @@ export const THEMES: FullTheme[] = [
     '--accent': '28 85% 52%', '--ring': '28 85% 52%', '--chat-bubble-own': '28 85% 52%',
     '--sidebar-primary': '28 85% 52%', '--sidebar-ring': '28 85% 52%',
   }, {
-    bodyBg: 'linear-gradient(180deg, hsl(28 30% 8% / 0) 0%, hsl(28 40% 12% / 0.08) 70%, hsl(15 50% 15% / 0.12) 100%), radial-gradient(ellipse at 50% 100%, hsl(28 80% 50% / 0.06) 0%, transparent 50%)',
+    bodyBg: 'linear-gradient(180deg, hsl(28 30% 8% / 0) 0%, hsl(28 40% 12% / 0.28) 70%, hsl(15 50% 15% / 0.30) 100%), radial-gradient(ellipse at 50% 100%, hsl(28 80% 50% / 0.21) 0%, transparent 50%)',
   }),
 
   // 6 — Arctic Frost — ice crystals
@@ -133,7 +136,7 @@ export const THEMES: FullTheme[] = [
     '--sidebar-primary': '185 65% 48%', '--sidebar-ring': '185 65% 48%',
     '--foreground': '185 5% 90%',
   }, { font: "'Inter', system-ui, sans-serif", radius: '0.5rem', bubbleOwn: '12px 12px 2px 12px', bubbleOther: '12px 12px 12px 2px',
-    bodyBg: 'linear-gradient(135deg, hsl(185 20% 6% / 0) 0%, hsl(195 25% 10% / 0.06) 50%, hsl(185 20% 6% / 0) 100%), repeating-linear-gradient(60deg, transparent, transparent 40px, hsl(185 30% 40% / 0.02) 40px, hsl(185 30% 40% / 0.02) 41px)',
+    bodyBg: 'linear-gradient(135deg, hsl(185 20% 6% / 0) 0%, hsl(195 25% 10% / 0.21) 50%, hsl(185 20% 6% / 0) 100%), repeating-linear-gradient(60deg, transparent, transparent 40px, hsl(185 30% 40% / 0.07) 40px, hsl(185 30% 40% / 0.07) 41px)',
   }),
 
   // 7 — Crimson Blaze — ember particles
@@ -142,7 +145,7 @@ export const THEMES: FullTheme[] = [
     '--accent': '0 78% 52%', '--ring': '0 78% 52%', '--chat-bubble-own': '0 78% 52%',
     '--sidebar-primary': '0 78% 52%', '--sidebar-ring': '0 78% 52%',
   }, { font: "'Roboto', system-ui, sans-serif", radius: '0.375rem', bubbleOwn: '4px', bubbleOther: '4px',
-    bodyBg: 'radial-gradient(2px 2px at 30% 20%, hsl(0 70% 50% / 0.1), transparent), radial-gradient(2px 2px at 70% 60%, hsl(20 80% 50% / 0.08), transparent), radial-gradient(3px 3px at 50% 90%, hsl(0 60% 45% / 0.06), transparent), radial-gradient(ellipse at 50% 100%, hsl(0 50% 20% / 0.1) 0%, transparent 50%)',
+    bodyBg: 'radial-gradient(2px 2px at 30% 20%, hsl(0 70% 50% / 0.1), transparent), radial-gradient(2px 2px at 70% 60%, hsl(20 80% 50% / 0.28), transparent), radial-gradient(3px 3px at 50% 90%, hsl(0 60% 45% / 0.21), transparent), radial-gradient(ellipse at 50% 100%, hsl(0 50% 20% / 0.1) 0%, transparent 50%)',
   }),
 
   // 8 — Royal Indigo — diamond grid
@@ -151,7 +154,7 @@ export const THEMES: FullTheme[] = [
     '--accent': '245 75% 58%', '--ring': '245 75% 58%', '--chat-bubble-own': '245 75% 58%',
     '--sidebar-primary': '245 75% 58%', '--sidebar-ring': '245 75% 58%',
   }, { font: "'Montserrat', system-ui, sans-serif", radius: '1.25rem',
-    bodyBg: 'repeating-linear-gradient(45deg, transparent, transparent 30px, hsl(245 30% 25% / 0.03) 30px, hsl(245 30% 25% / 0.03) 31px), repeating-linear-gradient(-45deg, transparent, transparent 30px, hsl(245 30% 25% / 0.03) 30px, hsl(245 30% 25% / 0.03) 31px), radial-gradient(ellipse at 50% 0%, hsl(245 60% 50% / 0.05) 0%, transparent 50%)',
+    bodyBg: 'repeating-linear-gradient(45deg, transparent, transparent 30px, hsl(245 30% 25% / 0.25) 30px, hsl(245 30% 25% / 0.25) 31px), repeating-linear-gradient(-45deg, transparent, transparent 30px, hsl(245 30% 25% / 0.25) 30px, hsl(245 30% 25% / 0.25) 31px), radial-gradient(ellipse at 50% 0%, hsl(245 60% 50% / 0.18) 0%, transparent 50%)',
   }),
 
   // 9 — Cyber Neon — scan lines
@@ -161,7 +164,7 @@ export const THEMES: FullTheme[] = [
     '--sidebar-primary': '190 100% 50%', '--sidebar-ring': '190 100% 50%',
     '--foreground': '190 5% 92%',
   }, { radius: '0rem', bubbleOwn: '0px', bubbleOther: '0px',
-    bodyBg: 'repeating-linear-gradient(0deg, transparent, transparent 3px, hsl(190 100% 50% / 0.015) 3px, hsl(190 100% 50% / 0.015) 4px), radial-gradient(ellipse at 20% 0%, hsl(190 100% 50% / 0.08) 0%, transparent 40%), radial-gradient(ellipse at 80% 100%, hsl(320 100% 55% / 0.06) 0%, transparent 40%)',
+    bodyBg: 'repeating-linear-gradient(0deg, transparent, transparent 3px, hsl(190 100% 50% / 0.06) 3px, hsl(190 100% 50% / 0.06) 4px), radial-gradient(ellipse at 20% 0%, hsl(190 100% 50% / 0.28) 0%, transparent 40%), radial-gradient(ellipse at 80% 100%, hsl(320 100% 55% / 0.21) 0%, transparent 40%)',
   }),
 
   // 10 — Golden Luxury — subtle damask
@@ -171,7 +174,7 @@ export const THEMES: FullTheme[] = [
     '--sidebar-primary': '42 90% 50%', '--sidebar-ring': '42 90% 50%',
     '--foreground': '42 8% 90%',
   }, { font: "'Montserrat', system-ui, sans-serif",
-    bodyBg: 'radial-gradient(circle at 25% 25%, hsl(42 50% 40% / 0.05) 0%, transparent 30%), radial-gradient(circle at 75% 75%, hsl(42 50% 40% / 0.05) 0%, transparent 30%), radial-gradient(circle at 75% 25%, hsl(42 40% 35% / 0.03) 0%, transparent 25%), radial-gradient(circle at 25% 75%, hsl(42 40% 35% / 0.03) 0%, transparent 25%)',
+    bodyBg: 'radial-gradient(circle at 25% 25%, hsl(42 50% 40% / 0.18) 0%, transparent 30%), radial-gradient(circle at 75% 75%, hsl(42 50% 40% / 0.18) 0%, transparent 30%), radial-gradient(circle at 75% 25%, hsl(42 40% 35% / 0.25) 0%, transparent 25%), radial-gradient(circle at 25% 75%, hsl(42 40% 35% / 0.25) 0%, transparent 25%)',
   }),
 
   // 11 — Monochrome — clean grid
@@ -182,7 +185,7 @@ export const THEMES: FullTheme[] = [
     '--muted': '0 0% 12%', '--muted-foreground': '0 0% 50%', '--border': '0 0% 15%',
     '--sidebar-background': '0 0% 6%', '--sidebar-border': '0 0% 12%',
   }, { font: "'Inter', system-ui, sans-serif", radius: '0.5rem', bubbleOwn: '8px', bubbleOther: '8px',
-    bodyBg: 'repeating-linear-gradient(0deg, transparent, transparent 50px, hsl(0 0% 100% / 0.015) 50px, hsl(0 0% 100% / 0.015) 51px), repeating-linear-gradient(90deg, transparent, transparent 50px, hsl(0 0% 100% / 0.015) 50px, hsl(0 0% 100% / 0.015) 51px)',
+    bodyBg: 'repeating-linear-gradient(0deg, transparent, transparent 50px, hsl(0 0% 100% / 0.06) 50px, hsl(0 0% 100% / 0.06) 51px), repeating-linear-gradient(90deg, transparent, transparent 50px, hsl(0 0% 100% / 0.06) 50px, hsl(0 0% 100% / 0.06) 51px)',
   }),
 
   // 12 — Neon Pink — city lights
@@ -191,7 +194,7 @@ export const THEMES: FullTheme[] = [
     '--accent': '325 90% 58%', '--ring': '325 90% 58%', '--chat-bubble-own': '325 85% 52%',
     '--sidebar-primary': '325 90% 58%', '--sidebar-ring': '325 90% 58%',
   }, { radius: '1.5rem', bubbleOwn: '28px', bubbleOther: '28px',
-    bodyBg: 'radial-gradient(ellipse at 30% 0%, hsl(325 80% 55% / 0.08) 0%, transparent 35%), radial-gradient(ellipse at 70% 100%, hsl(280 70% 50% / 0.06) 0%, transparent 35%), linear-gradient(180deg, hsl(280 20% 6% / 0) 0%, hsl(300 15% 8% / 0.05) 100%)',
+    bodyBg: 'radial-gradient(ellipse at 30% 0%, hsl(325 80% 55% / 0.28) 0%, transparent 35%), radial-gradient(ellipse at 70% 100%, hsl(280 70% 50% / 0.21) 0%, transparent 35%), linear-gradient(180deg, hsl(280 20% 6% / 0) 0%, hsl(300 15% 8% / 0.18) 100%)',
   }),
 
   // 13 — Earth Clay — terrain texture
@@ -201,7 +204,7 @@ export const THEMES: FullTheme[] = [
     '--sidebar-primary': '22 60% 48%', '--sidebar-ring': '22 60% 48%',
     '--muted-foreground': '22 8% 48%',
   }, { font: "'Roboto', system-ui, sans-serif", radius: '0.75rem',
-    bodyBg: 'radial-gradient(circle at 40% 60%, hsl(22 30% 20% / 0.06) 0%, transparent 40%), radial-gradient(circle at 80% 30%, hsl(30 25% 18% / 0.05) 0%, transparent 35%), linear-gradient(180deg, hsl(22 15% 8% / 0) 0%, hsl(22 20% 10% / 0.04) 100%)',
+    bodyBg: 'radial-gradient(circle at 40% 60%, hsl(22 30% 20% / 0.21) 0%, transparent 40%), radial-gradient(circle at 80% 30%, hsl(30 25% 18% / 0.18) 0%, transparent 35%), linear-gradient(180deg, hsl(22 15% 8% / 0) 0%, hsl(22 20% 10% / 0.35) 100%)',
   }),
 
   // 14 — Lavender Mist — fog layers
@@ -210,7 +213,7 @@ export const THEMES: FullTheme[] = [
     '--accent': '275 65% 62%', '--ring': '275 65% 62%', '--chat-bubble-own': '275 60% 55%',
     '--sidebar-primary': '275 65% 62%', '--sidebar-ring': '275 65% 62%',
   }, { font: "'Montserrat', system-ui, sans-serif", radius: '1.25rem',
-    bodyBg: 'radial-gradient(ellipse at 0% 50%, hsl(275 40% 30% / 0.08) 0%, transparent 50%), radial-gradient(ellipse at 100% 50%, hsl(275 35% 28% / 0.06) 0%, transparent 50%), linear-gradient(180deg, hsl(275 18% 8% / 0) 0%, hsl(280 15% 10% / 0.04) 100%)',
+    bodyBg: 'radial-gradient(ellipse at 0% 50%, hsl(275 40% 30% / 0.28) 0%, transparent 50%), radial-gradient(ellipse at 100% 50%, hsl(275 35% 28% / 0.21) 0%, transparent 50%), linear-gradient(180deg, hsl(275 18% 8% / 0) 0%, hsl(280 15% 10% / 0.35) 100%)',
   }),
 
   // 15 — Matrix Code — falling code lines
@@ -220,7 +223,7 @@ export const THEMES: FullTheme[] = [
     '--sidebar-primary': '120 80% 42%', '--sidebar-ring': '120 80% 42%',
     '--foreground': '120 10% 85%', '--muted': '120 10% 8%', '--border': '120 10% 10%',
   }, { font: "'Roboto', system-ui, sans-serif", radius: '0rem', bubbleOwn: '2px', bubbleOther: '2px',
-    bodyBg: 'repeating-linear-gradient(90deg, transparent, transparent 18px, hsl(120 60% 35% / 0.03) 18px, hsl(120 60% 35% / 0.03) 19px), repeating-linear-gradient(0deg, transparent, transparent 24px, hsl(120 50% 30% / 0.02) 24px, hsl(120 50% 30% / 0.02) 25px)',
+    bodyBg: 'repeating-linear-gradient(90deg, transparent, transparent 18px, hsl(120 60% 35% / 0.25) 18px, hsl(120 60% 35% / 0.25) 19px), repeating-linear-gradient(0deg, transparent, transparent 24px, hsl(120 50% 30% / 0.07) 24px, hsl(120 50% 30% / 0.07) 25px)',
   }),
 
   // 16 — Coral Reef — underwater bubbles
@@ -229,7 +232,7 @@ export const THEMES: FullTheme[] = [
     '--accent': '175 60% 45%', '--ring': '12 75% 55%', '--chat-bubble-own': '12 70% 50%',
     '--sidebar-primary': '12 75% 55%', '--sidebar-ring': '12 75% 55%',
   }, {
-    bodyBg: 'radial-gradient(12px 12px at 20% 30%, hsl(175 40% 40% / 0.04), transparent 50%), radial-gradient(8px 8px at 60% 70%, hsl(12 50% 45% / 0.05), transparent 50%), radial-gradient(15px 15px at 80% 20%, hsl(175 35% 35% / 0.03), transparent 50%), radial-gradient(ellipse at 50% 100%, hsl(200 40% 25% / 0.06) 0%, transparent 50%)',
+    bodyBg: 'radial-gradient(12px 12px at 20% 30%, hsl(175 40% 40% / 0.35), transparent 50%), radial-gradient(8px 8px at 60% 70%, hsl(12 50% 45% / 0.18), transparent 50%), radial-gradient(15px 15px at 80% 20%, hsl(175 35% 35% / 0.25), transparent 50%), radial-gradient(ellipse at 50% 100%, hsl(200 40% 25% / 0.21) 0%, transparent 50%)',
   }),
 
   // 17 — Deep Space — nebula clouds
@@ -238,7 +241,7 @@ export const THEMES: FullTheme[] = [
     '--accent': '280 70% 60%', '--ring': '240 70% 60%', '--chat-bubble-own': '240 65% 52%',
     '--sidebar-primary': '240 70% 60%', '--sidebar-ring': '240 70% 60%',
   }, {
-    bodyBg: 'radial-gradient(1.5px 1.5px at 10% 15%, hsl(0 0% 80% / 0.12), transparent), radial-gradient(1px 1px at 40% 60%, hsl(0 0% 70% / 0.1), transparent), radial-gradient(2px 2px at 70% 30%, hsl(0 0% 75% / 0.08), transparent), radial-gradient(1px 1px at 90% 85%, hsl(0 0% 70% / 0.1), transparent), radial-gradient(ellipse at 10% 20%, hsl(240 70% 60% / 0.07) 0%, transparent 40%), radial-gradient(ellipse at 90% 80%, hsl(280 70% 60% / 0.05) 0%, transparent 40%)',
+    bodyBg: 'radial-gradient(1.5px 1.5px at 10% 15%, hsl(0 0% 80% / 0.30), transparent), radial-gradient(1px 1px at 40% 60%, hsl(0 0% 70% / 0.1), transparent), radial-gradient(2px 2px at 70% 30%, hsl(0 0% 75% / 0.28), transparent), radial-gradient(1px 1px at 90% 85%, hsl(0 0% 70% / 0.1), transparent), radial-gradient(ellipse at 10% 20%, hsl(240 70% 60% / 0.25) 0%, transparent 40%), radial-gradient(ellipse at 90% 80%, hsl(280 70% 60% / 0.18) 0%, transparent 40%)',
   }),
 
   // 18 — Pastel Dream — soft circles
@@ -248,7 +251,7 @@ export const THEMES: FullTheme[] = [
     '--sidebar-primary': '200 55% 58%', '--sidebar-ring': '200 55% 58%',
     '--muted-foreground': '200 8% 52%',
   }, { font: "'Montserrat', system-ui, sans-serif", radius: '1.5rem', bubbleOwn: '24px', bubbleOther: '24px',
-    bodyBg: 'radial-gradient(circle at 15% 85%, hsl(200 40% 40% / 0.05) 0%, transparent 30%), radial-gradient(circle at 85% 15%, hsl(180 35% 38% / 0.04) 0%, transparent 25%), radial-gradient(circle at 50% 50%, hsl(200 30% 35% / 0.03) 0%, transparent 40%)',
+    bodyBg: 'radial-gradient(circle at 15% 85%, hsl(200 40% 40% / 0.18) 0%, transparent 30%), radial-gradient(circle at 85% 15%, hsl(180 35% 38% / 0.35) 0%, transparent 25%), radial-gradient(circle at 50% 50%, hsl(200 30% 35% / 0.25) 0%, transparent 40%)',
   }),
 
   // 19 — Terminal Dark — scanline
@@ -259,7 +262,7 @@ export const THEMES: FullTheme[] = [
     '--foreground': '130 5% 82%', '--muted': '0 0% 8%', '--muted-foreground': '0 0% 45%',
     '--border': '0 0% 10%', '--sidebar-background': '0 0% 4%', '--sidebar-border': '0 0% 8%',
   }, { font: "'Roboto', system-ui, sans-serif", radius: '0.25rem', bubbleOwn: '4px', bubbleOther: '4px',
-    bodyBg: 'repeating-linear-gradient(0deg, transparent, transparent 2px, hsl(130 50% 40% / 0.01) 2px, hsl(130 50% 40% / 0.01) 3px)',
+    bodyBg: 'repeating-linear-gradient(0deg, transparent, transparent 2px, hsl(130 50% 40% / 0.12) 2px, hsl(130 50% 40% / 0.12) 3px)',
   }),
 
   // 20 — Aurora Borealis — northern lights
@@ -268,7 +271,7 @@ export const THEMES: FullTheme[] = [
     '--accent': '280 65% 55%', '--ring': '195 75% 52%', '--chat-bubble-own': '195 70% 45%',
     '--sidebar-primary': '195 75% 52%', '--sidebar-ring': '195 75% 52%',
   }, { radius: '1rem',
-    bodyBg: 'radial-gradient(ellipse at 15% 0%, hsl(195 75% 52% / 0.08) 0%, transparent 45%), radial-gradient(ellipse at 50% 30%, hsl(160 60% 45% / 0.04) 0%, transparent 35%), radial-gradient(ellipse at 85% 100%, hsl(280 65% 55% / 0.06) 0%, transparent 45%)',
+    bodyBg: 'radial-gradient(ellipse at 15% 0%, hsl(195 75% 52% / 0.28) 0%, transparent 45%), radial-gradient(ellipse at 50% 30%, hsl(160 60% 45% / 0.35) 0%, transparent 35%), radial-gradient(ellipse at 85% 100%, hsl(280 65% 55% / 0.21) 0%, transparent 45%)',
   }),
 
   // 21 — Volcanic Ash — lava cracks
@@ -277,7 +280,7 @@ export const THEMES: FullTheme[] = [
     '--accent': '35 90% 50%', '--ring': '5 80% 50%', '--chat-bubble-own': '5 75% 45%',
     '--sidebar-primary': '5 80% 50%', '--sidebar-ring': '5 80% 50%',
   }, { font: "'Roboto', system-ui, sans-serif", radius: '0.5rem',
-    bodyBg: 'radial-gradient(ellipse at 30% 90%, hsl(5 60% 30% / 0.08) 0%, transparent 40%), radial-gradient(ellipse at 70% 10%, hsl(35 70% 35% / 0.05) 0%, transparent 35%), linear-gradient(180deg, hsl(5 10% 5% / 0) 60%, hsl(5 30% 12% / 0.06) 100%)',
+    bodyBg: 'radial-gradient(ellipse at 30% 90%, hsl(5 60% 30% / 0.28) 0%, transparent 40%), radial-gradient(ellipse at 70% 10%, hsl(35 70% 35% / 0.18) 0%, transparent 35%), linear-gradient(180deg, hsl(5 10% 5% / 0) 60%, hsl(5 30% 12% / 0.21) 100%)',
   }),
 
   // 22 — Mint Fresh — clean dots
@@ -286,7 +289,7 @@ export const THEMES: FullTheme[] = [
     '--accent': '168 65% 48%', '--ring': '168 65% 48%', '--chat-bubble-own': '168 60% 42%',
     '--sidebar-primary': '168 65% 48%', '--sidebar-ring': '168 65% 48%',
   }, { radius: '1.25rem', bubbleOwn: '22px', bubbleOther: '22px',
-    bodyBg: 'radial-gradient(circle, hsl(168 40% 40% / 0.04) 1px, transparent 1px), radial-gradient(ellipse at 80% 20%, hsl(168 50% 40% / 0.05) 0%, transparent 40%)',
+    bodyBg: 'radial-gradient(circle, hsl(168 40% 40% / 0.35) 1px, transparent 1px), radial-gradient(ellipse at 80% 20%, hsl(168 50% 40% / 0.18) 0%, transparent 40%)',
   }),
 
   // 23 — Deep Blue — ocean floor
@@ -295,7 +298,7 @@ export const THEMES: FullTheme[] = [
     '--accent': '220 72% 55%', '--ring': '220 72% 55%', '--chat-bubble-own': '220 68% 48%',
     '--sidebar-primary': '220 72% 55%', '--sidebar-ring': '220 72% 55%',
   }, { font: "'Inter', system-ui, sans-serif",
-    bodyBg: 'radial-gradient(ellipse at 50% 0%, hsl(220 50% 30% / 0.06) 0%, transparent 50%), linear-gradient(180deg, hsl(220 25% 6% / 0) 0%, hsl(220 30% 10% / 0.06) 100%)',
+    bodyBg: 'radial-gradient(ellipse at 50% 0%, hsl(220 50% 30% / 0.21) 0%, transparent 50%), linear-gradient(180deg, hsl(220 25% 6% / 0) 0%, hsl(220 30% 10% / 0.21) 100%)',
   }),
 
   // 24 — Rose Gold — shimmer
@@ -304,7 +307,7 @@ export const THEMES: FullTheme[] = [
     '--accent': '30 70% 55%', '--ring': '345 65% 58%', '--chat-bubble-own': '345 60% 52%',
     '--sidebar-primary': '345 65% 58%', '--sidebar-ring': '345 65% 58%',
   }, { font: "'Montserrat', system-ui, sans-serif", radius: '1.25rem',
-    bodyBg: 'radial-gradient(ellipse at 20% 0%, hsl(345 50% 40% / 0.06) 0%, transparent 40%), radial-gradient(ellipse at 80% 100%, hsl(30 50% 40% / 0.05) 0%, transparent 40%)',
+    bodyBg: 'radial-gradient(ellipse at 20% 0%, hsl(345 50% 40% / 0.21) 0%, transparent 40%), radial-gradient(ellipse at 80% 100%, hsl(30 50% 40% / 0.18) 0%, transparent 40%)',
   }),
 
   // 25 — Electric Storm — lightning bolts
@@ -314,7 +317,7 @@ export const THEMES: FullTheme[] = [
     '--sidebar-primary': '48 90% 50%', '--sidebar-ring': '48 90% 50%',
     '--foreground': '48 5% 90%',
   }, { radius: '0.375rem',
-    bodyBg: 'radial-gradient(ellipse at 50% 0%, hsl(48 70% 40% / 0.06) 0%, transparent 40%), radial-gradient(ellipse at 20% 80%, hsl(48 50% 30% / 0.04) 0%, transparent 30%), linear-gradient(180deg, hsl(48 12% 5% / 0) 0%, hsl(240 15% 8% / 0.05) 100%)',
+    bodyBg: 'radial-gradient(ellipse at 50% 0%, hsl(48 70% 40% / 0.21) 0%, transparent 40%), radial-gradient(ellipse at 20% 80%, hsl(48 50% 30% / 0.35) 0%, transparent 30%), linear-gradient(180deg, hsl(48 12% 5% / 0) 0%, hsl(240 15% 8% / 0.18) 100%)',
   }),
 
   // 26 — Zen Stone — minimal ripple
@@ -324,7 +327,7 @@ export const THEMES: FullTheme[] = [
     '--sidebar-primary': '150 40% 48%', '--sidebar-ring': '150 40% 48%',
     '--muted-foreground': '150 5% 48%',
   }, { font: "'Inter', system-ui, sans-serif", radius: '0.75rem',
-    bodyBg: 'radial-gradient(circle at 50% 50%, hsl(150 20% 20% / 0.04) 0%, transparent 50%)',
+    bodyBg: 'radial-gradient(circle at 50% 50%, hsl(150 20% 20% / 0.35) 0%, transparent 50%)',
   }),
 
   // 27 — Synthwave — retro grid
@@ -333,7 +336,7 @@ export const THEMES: FullTheme[] = [
     '--accent': '190 90% 50%', '--ring': '320 85% 58%', '--chat-bubble-own': '320 80% 50%',
     '--sidebar-primary': '320 85% 58%', '--sidebar-ring': '320 85% 58%',
   }, { radius: '1.5rem', bubbleOwn: '28px', bubbleOther: '28px',
-    bodyBg: 'linear-gradient(180deg, hsl(290 20% 6% / 0) 0%, hsl(290 25% 10% / 0.06) 60%, hsl(320 30% 12% / 0.1) 100%), repeating-linear-gradient(90deg, transparent, transparent 40px, hsl(320 60% 50% / 0.02) 40px, hsl(320 60% 50% / 0.02) 41px), repeating-linear-gradient(0deg, transparent, transparent 40px, hsl(190 60% 45% / 0.02) 40px, hsl(190 60% 45% / 0.02) 41px)',
+    bodyBg: 'linear-gradient(180deg, hsl(290 20% 6% / 0) 0%, hsl(290 25% 10% / 0.21) 60%, hsl(320 30% 12% / 0.1) 100%), repeating-linear-gradient(90deg, transparent, transparent 40px, hsl(320 60% 50% / 0.07) 40px, hsl(320 60% 50% / 0.07) 41px), repeating-linear-gradient(0deg, transparent, transparent 40px, hsl(190 60% 45% / 0.07) 40px, hsl(190 60% 45% / 0.07) 41px)',
   }),
 
   // 28 — Carbon Dark — carbon fiber
@@ -343,7 +346,7 @@ export const THEMES: FullTheme[] = [
     '--sidebar-primary': '210 55% 52%', '--sidebar-ring': '210 55% 52%',
     '--muted': '210 5% 11%', '--border': '210 5% 13%',
   }, { font: "'Roboto', system-ui, sans-serif", radius: '0.5rem', bubbleOwn: '8px', bubbleOther: '8px',
-    bodyBg: 'repeating-linear-gradient(45deg, transparent, transparent 5px, hsl(210 10% 10% / 0.04) 5px, hsl(210 10% 10% / 0.04) 6px), repeating-linear-gradient(-45deg, transparent, transparent 5px, hsl(210 10% 10% / 0.04) 5px, hsl(210 10% 10% / 0.04) 6px)',
+    bodyBg: 'repeating-linear-gradient(45deg, transparent, transparent 5px, hsl(210 10% 10% / 0.35) 5px, hsl(210 10% 10% / 0.35) 6px), repeating-linear-gradient(-45deg, transparent, transparent 5px, hsl(210 10% 10% / 0.35) 5px, hsl(210 10% 10% / 0.35) 6px)',
   }),
 
   // 29 — Tropical Paradise — palm leaves
@@ -352,7 +355,7 @@ export const THEMES: FullTheme[] = [
     '--accent': '165 65% 45%', '--ring': '18 80% 55%', '--chat-bubble-own': '18 75% 48%',
     '--sidebar-primary': '18 80% 55%', '--sidebar-ring': '18 80% 55%',
   }, { font: "'Montserrat', system-ui, sans-serif", radius: '1rem',
-    bodyBg: 'radial-gradient(ellipse at 0% 100%, hsl(165 50% 30% / 0.07) 0%, transparent 40%), radial-gradient(ellipse at 100% 0%, hsl(18 60% 40% / 0.06) 0%, transparent 40%), radial-gradient(ellipse at 50% 50%, hsl(165 40% 25% / 0.03) 0%, transparent 50%)',
+    bodyBg: 'radial-gradient(ellipse at 0% 100%, hsl(165 50% 30% / 0.25) 0%, transparent 40%), radial-gradient(ellipse at 100% 0%, hsl(18 60% 40% / 0.21) 0%, transparent 40%), radial-gradient(ellipse at 50% 50%, hsl(165 40% 25% / 0.25) 0%, transparent 50%)',
   }),
 
   // 30 — Ice Crystal — frost pattern
@@ -361,7 +364,7 @@ export const THEMES: FullTheme[] = [
     '--accent': '230 65% 58%', '--ring': '200 70% 55%', '--chat-bubble-own': '200 65% 48%',
     '--sidebar-primary': '200 70% 55%', '--sidebar-ring': '200 70% 55%',
   }, { font: "'Inter', system-ui, sans-serif",
-    bodyBg: 'radial-gradient(2px 2px at 15% 20%, hsl(200 50% 60% / 0.1), transparent), radial-gradient(1.5px 1.5px at 55% 45%, hsl(230 45% 55% / 0.08), transparent), radial-gradient(2px 2px at 85% 75%, hsl(200 50% 60% / 0.1), transparent), radial-gradient(ellipse at 50% 0%, hsl(200 50% 40% / 0.06) 0%, transparent 50%)',
+    bodyBg: 'radial-gradient(2px 2px at 15% 20%, hsl(200 50% 60% / 0.1), transparent), radial-gradient(1.5px 1.5px at 55% 45%, hsl(230 45% 55% / 0.28), transparent), radial-gradient(2px 2px at 85% 75%, hsl(200 50% 60% / 0.1), transparent), radial-gradient(ellipse at 50% 0%, hsl(200 50% 40% / 0.21) 0%, transparent 50%)',
   }),
 
   // 31 — Anime
@@ -417,6 +420,6 @@ export const THEMES: FullTheme[] = [
     radius: '1.25rem',
     bubbleOwn: '24px 24px 6px 24px',
     bubbleOther: '24px 24px 24px 6px',
-    bodyBg: 'radial-gradient(ellipse at 10% 0%, hsl(300 80% 60% / 0.1) 0%, transparent 50%), radial-gradient(ellipse at 90% 20%, hsl(200 90% 60% / 0.08) 0%, transparent 40%), radial-gradient(ellipse at 50% 100%, hsl(330 85% 55% / 0.06) 0%, transparent 50%)',
+    bodyBg: 'radial-gradient(ellipse at 10% 0%, hsl(300 80% 60% / 0.1) 0%, transparent 50%), radial-gradient(ellipse at 90% 20%, hsl(200 90% 60% / 0.28) 0%, transparent 40%), radial-gradient(ellipse at 50% 100%, hsl(330 85% 55% / 0.21) 0%, transparent 50%)',
   },
 ];

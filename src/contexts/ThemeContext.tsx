@@ -30,6 +30,8 @@ function applyTheme(theme: FullTheme | null) {
     root.removeAttribute('style');
     root.removeAttribute('data-theme');
     document.body.style.backgroundImage = '';
+    document.body.style.backgroundAttachment = '';
+    document.body.style.backgroundSize = '';
     return;
   }
   for (const [key, value] of Object.entries(theme.vars)) {
@@ -37,6 +39,8 @@ function applyTheme(theme: FullTheme | null) {
   }
   root.style.fontFamily = theme.font;
   document.body.style.backgroundImage = theme.bodyBg;
+  document.body.style.backgroundAttachment = 'fixed';
+  document.body.style.backgroundSize = theme.bgSize || 'auto';
 
   // Set data-theme attribute for CSS-only theme overrides (e.g. anime).
   if (theme.id === 'anime') {
