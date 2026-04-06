@@ -6,7 +6,6 @@ import {
 import { cn } from '@/lib/utils';
 import { Avatar } from './Avatar';
 import { chats as defaultChats, users, type Chat, type Channel, type ChatFolder } from '@/data/mockData';
-import { useTheme } from '@/contexts/ThemeContext';
 import { motion, AnimatePresence } from 'framer-motion';
 
 type Tab = 'chats' | 'groups' | 'channels';
@@ -75,7 +74,6 @@ export function ChatList({
   const [menuOpen, setMenuOpen] = useState(false);
   const [tab, setTab] = useState<Tab>('chats');
   const [activeFolderId, setActiveFolderId] = useState<string | null>(null);
-  const { surfaceClass, headerClass, iconAnimClass } = useTheme();
 
   const allChats = [...defaultChats, ...extraChats];
   const activeFolder = activeFolderId ? folders.find(f => f.id === activeFolderId) : null;
@@ -116,13 +114,13 @@ export function ChatList({
   return (
     <div className="flex flex-col h-full bg-card border-r border-border">
       {/* Header */}
-      <div className={cn('p-3 flex items-center gap-2 border-b border-border', headerClass)}>
+      <div className={cn('p-3 flex items-center gap-2 border-b border-border')}>
         <div className="relative">
           <button
             onClick={() => setMenuOpen(!menuOpen)}
             className="p-2 rounded-xl bg-gradient-to-br from-primary/20 to-accent/10 hover:from-primary/30 hover:to-accent/20 transition-all"
           >
-            <LayoutGrid className={cn('w-5 h-5 text-primary', iconAnimClass)} />
+            <LayoutGrid className={cn('w-5 h-5 text-primary')} />
           </button>
           <AnimatePresence>
             {menuOpen && (
@@ -131,7 +129,7 @@ export function ChatList({
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.9, y: -8 }}
                 transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-                className={cn('absolute left-0 top-full mt-2 z-50 w-60 rounded-2xl shadow-2xl overflow-hidden', surfaceClass)}
+                className={cn('absolute left-0 top-full mt-2 z-50 w-60 rounded-2xl shadow-2xl overflow-hidden', 'glass-card')}
               >
                 <div className="p-2 space-y-0.5">
                   <button
@@ -139,7 +137,7 @@ export function ChatList({
                     className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm hover:bg-muted/60 transition-all text-foreground group"
                   >
                     <GradientIcon gradient="from-blue-500 to-cyan-400 shadow-blue-500/25">
-                      <Users className={cn('w-4 h-4 text-white', iconAnimClass)} />
+                      <Users className={cn('w-4 h-4 text-white')} />
                     </GradientIcon>
                     <span className="font-medium">Новая группа</span>
                   </button>
@@ -148,7 +146,7 @@ export function ChatList({
                     className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm hover:bg-muted/60 transition-all text-foreground group"
                   >
                     <GradientIcon gradient="from-violet-500 to-fuchsia-500 shadow-violet-500/25">
-                      <Megaphone className={cn('w-4 h-4 text-white', iconAnimClass)} />
+                      <Megaphone className={cn('w-4 h-4 text-white')} />
                     </GradientIcon>
                     <span className="font-medium">Новый канал</span>
                   </button>
@@ -157,7 +155,7 @@ export function ChatList({
                     className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm hover:bg-muted/60 transition-all text-foreground group"
                   >
                     <GradientIcon gradient="from-amber-500 to-orange-400 shadow-amber-500/25">
-                      <FolderOpen className={cn('w-4 h-4 text-white', iconAnimClass)} />
+                      <FolderOpen className={cn('w-4 h-4 text-white')} />
                     </GradientIcon>
                     <span className="font-medium">Папки чатов</span>
                   </button>
@@ -167,7 +165,7 @@ export function ChatList({
                     className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm hover:bg-muted/60 transition-all text-foreground group"
                   >
                     <GradientIcon gradient="from-emerald-500 to-teal-400 shadow-emerald-500/25">
-                      <SlidersHorizontal className={cn('w-4 h-4 text-white', iconAnimClass)} />
+                      <SlidersHorizontal className={cn('w-4 h-4 text-white')} />
                     </GradientIcon>
                     <span className="font-medium">Настройки</span>
                   </button>
@@ -176,7 +174,7 @@ export function ChatList({
                     className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm hover:bg-muted/60 transition-all text-foreground group"
                   >
                     <GradientIcon gradient="from-rose-500 to-pink-500 shadow-rose-500/25">
-                      <Shield className={cn('w-4 h-4 text-white', iconAnimClass)} />
+                      <Shield className={cn('w-4 h-4 text-white')} />
                     </GradientIcon>
                     <span className="font-medium">Админ-панель</span>
                   </button>
@@ -186,7 +184,7 @@ export function ChatList({
           </AnimatePresence>
         </div>
         <div className="flex-1 relative">
-          <Search className={cn('absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary/60', iconAnimClass)} />
+          <Search className={cn('absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary/60')} />
           <input
             type="text"
             placeholder="Поиск..."
@@ -267,7 +265,7 @@ export function ChatList({
               className="w-full flex items-center gap-3 px-3 py-3 hover:bg-muted/30 transition-all text-left border-b border-border/30"
             >
               <GradientIcon gradient="from-violet-500 to-fuchsia-500 shadow-violet-500/20">
-                <Plus className={cn('w-5 h-5 text-white', iconAnimClass)} />
+                <Plus className={cn('w-5 h-5 text-white')} />
               </GradientIcon>
               <div>
                 <p className="text-sm font-semibold text-primary">Создать канал</p>
@@ -288,7 +286,7 @@ export function ChatList({
                 >
                   <div className="relative flex-shrink-0">
                     <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-violet-500/20 to-fuchsia-500/20 flex items-center justify-center border border-violet-500/10">
-                      <Megaphone className={cn('w-6 h-6 text-violet-400', iconAnimClass)} />
+                      <Megaphone className={cn('w-6 h-6 text-violet-400')} />
                     </div>
                   </div>
                   <div className="flex-1 min-w-0">
@@ -312,7 +310,7 @@ export function ChatList({
 
             {visibleChannels.length === 0 && (
               <div className="flex flex-col items-center justify-center h-40 text-muted-foreground">
-                <Megaphone className={cn('w-8 h-8 mb-2 opacity-40', iconAnimClass)} />
+                <Megaphone className={cn('w-8 h-8 mb-2 opacity-40')} />
                 <p className="text-sm">Каналов пока нет</p>
               </div>
             )}
@@ -326,7 +324,7 @@ export function ChatList({
             className="w-full flex items-center gap-3 px-3 py-3 hover:bg-muted/30 transition-all text-left border-b border-border/30"
           >
             <GradientIcon gradient="from-blue-500 to-cyan-400 shadow-blue-500/20">
-              <Plus className={cn('w-5 h-5 text-white', iconAnimClass)} />
+              <Plus className={cn('w-5 h-5 text-white')} />
             </GradientIcon>
             <div>
               <p className="text-sm font-semibold text-primary">Создать группу</p>
@@ -357,7 +355,7 @@ export function ChatList({
                   {isGroup ? (
                     <div className="relative flex-shrink-0">
                       <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500/20 to-cyan-400/20 flex items-center justify-center border border-blue-500/10">
-                        <UsersRound className={cn('w-6 h-6 text-blue-400', iconAnimClass)} />
+                        <UsersRound className={cn('w-6 h-6 text-blue-400')} />
                       </div>
                     </div>
                   ) : (
@@ -401,12 +399,12 @@ export function ChatList({
               <div className="flex flex-col items-center justify-center h-40 text-muted-foreground">
                 {effectiveTab === 'groups' ? (
                   <>
-                    <UsersRound className={cn('w-8 h-8 mb-2 opacity-40', iconAnimClass)} />
+                    <UsersRound className={cn('w-8 h-8 mb-2 opacity-40')} />
                     <p className="text-sm">Групп пока нет</p>
                   </>
                 ) : (
                   <>
-                    <Sparkles className={cn('w-8 h-8 mb-2 opacity-40', iconAnimClass)} />
+                    <Sparkles className={cn('w-8 h-8 mb-2 opacity-40')} />
                     <p className="text-sm">Чаты не найдены</p>
                   </>
                 )}
