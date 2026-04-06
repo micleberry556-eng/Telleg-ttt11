@@ -112,7 +112,7 @@ export function ChatList({
   const effectiveTab = visibleTabs.find(t => t.key === tab) ? tab : 'chats';
 
   return (
-    <div className="flex flex-col h-full bg-card/80 backdrop-blur-sm border-r border-border">
+    <div className="flex flex-col h-full bg-card/50 backdrop-blur-sm border-r border-border">
       {/* Header */}
       <div className={cn('p-3 flex items-center gap-2 border-b border-border')}>
         <div className="relative">

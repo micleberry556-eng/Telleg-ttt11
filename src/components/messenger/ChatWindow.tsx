@@ -105,9 +105,9 @@ export function ChatWindow({
   };
 
   return (
-    <div className={cn('flex flex-col h-full bg-background/80 backdrop-blur-sm', bgCls)}>
+    <div className={cn('flex flex-col h-full bg-background/50 backdrop-blur-sm', bgCls)}>
       {/* Header — themed */}
-      <div className={cn('flex items-center gap-3 px-4 py-3 border-b border-border bg-card/70 backdrop-blur-sm')}>
+      <div className={cn('flex items-center gap-3 px-4 py-3 border-b border-border bg-card/50 backdrop-blur-sm')}>
         {onBack && (
           <button onClick={onBack} className="p-1 hover:bg-muted rounded-lg transition-colors mr-1">
             <ArrowLeft className="w-5 h-5 text-muted-foreground" />
@@ -206,7 +206,7 @@ export function ChatWindow({
       </div>
 
       {/* Input — themed */}
-      <div className={cn('px-4 py-3 border-t border-border bg-card/70 backdrop-blur-sm')}>
+      <div className={cn('px-4 py-3 border-t border-border bg-card/50 backdrop-blur-sm')}>
         <div className="flex items-center gap-2">
           <button className="p-2.5 rounded-xl hover:bg-primary/10 transition-all">
             <Paperclip className={cn('w-5 h-5 text-primary/60')} />
