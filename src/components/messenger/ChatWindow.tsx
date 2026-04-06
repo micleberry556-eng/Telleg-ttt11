@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
-import { SendHorizontal, Link2, Smile, PhoneCall, Ellipsis, ArrowLeft, UsersRound, Hash } from 'lucide-react';
+import { SendHorizontal, Paperclip, Smile, PhoneCall, Ellipsis, ArrowLeft, Users, Hash, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Avatar } from './Avatar';
 import { EmojiPicker } from './EmojiPicker';
@@ -121,13 +121,13 @@ export function ChatWindow({
           onClick={handleHeaderClick}
         >
           {isTopic ? (
-            <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center flex-shrink-0 text-lg">
-              {topicIcon || <Hash className={cn('w-5 h-5 text-muted-foreground', iconAnimClass)} />}
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500/20 to-orange-400/20 flex items-center justify-center flex-shrink-0 border border-amber-500/10">
+              {topicIcon ? <span className="text-lg">{topicIcon}</span> : <Hash className={cn('w-5 h-5 text-amber-400', iconAnimClass)} />}
             </div>
           ) : isGroup ? (
             <div className="relative flex-shrink-0">
-              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                <UsersRound className={cn('w-5 h-5 text-primary', iconAnimClass)} />
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500/20 to-cyan-400/20 flex items-center justify-center border border-blue-500/10">
+                <Users className={cn('w-5 h-5 text-blue-400', iconAnimClass)} />
               </div>
             </div>
           ) : (
@@ -143,12 +143,12 @@ export function ChatWindow({
 
         <div className="flex items-center gap-1">
           {!isGroup && !isTopic && (
-            <button className="p-2 hover:bg-muted rounded-lg transition-colors">
-              <PhoneCall className={cn('w-4 h-4 text-muted-foreground', iconAnimClass)} />
+            <button className="p-2 rounded-xl hover:bg-primary/10 transition-all">
+              <PhoneCall className={cn('w-4 h-4 text-primary/70', iconAnimClass)} />
             </button>
           )}
-          <button className="p-2 hover:bg-muted rounded-lg transition-colors">
-            <Ellipsis className={cn('w-4 h-4 text-muted-foreground', iconAnimClass)} />
+          <button className="p-2 rounded-xl hover:bg-primary/10 transition-all">
+            <Ellipsis className={cn('w-4 h-4 text-primary/70', iconAnimClass)} />
           </button>
         </div>
       </div>
@@ -159,16 +159,20 @@ export function ChatWindow({
           <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
             {isTopic ? (
               <>
-                <Hash className="w-8 h-8 mb-2 opacity-50" />
-                <p className="text-sm">Нет сообщений в теме</p>
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-500/10 to-orange-400/10 flex items-center justify-center mb-3 border border-amber-500/10">
+                  <Hash className={cn('w-8 h-8 text-amber-400/50', iconAnimClass)} />
+                </div>
+                <p className="text-sm font-medium">Нет сообщений в теме</p>
               </>
             ) : (
               <>
-                <UsersRound className="w-8 h-8 mb-2 opacity-50" />
-                <p className="text-sm">Нет сообщений</p>
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center mb-3 border border-primary/10">
+                  <Sparkles className={cn('w-8 h-8 text-primary/50', iconAnimClass)} />
+                </div>
+                <p className="text-sm font-medium">Нет сообщений</p>
               </>
             )}
-            <p className="text-xs mt-1">Напишите первое сообщение!</p>
+            <p className="text-xs mt-1 text-muted-foreground/70">Напишите первое сообщение!</p>
           </div>
         )}
         {displayMessages.map((msg, i) => {
@@ -206,8 +210,8 @@ export function ChatWindow({
       {/* Input — themed */}
       <div className={cn('px-4 py-3 border-t border-border', surfaceClass)}>
         <div className="flex items-center gap-2">
-          <button className="p-2 hover:bg-muted rounded-lg transition-colors">
-            <Link2 className={cn('w-5 h-5 text-muted-foreground', iconAnimClass)} />
+          <button className="p-2.5 rounded-xl hover:bg-primary/10 transition-all">
+            <Paperclip className={cn('w-5 h-5 text-primary/60', iconAnimClass)} />
           </button>
           <div className="flex-1 relative">
             <input
@@ -216,13 +220,13 @@ export function ChatWindow({
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleSend()}
-              className="w-full bg-muted rounded-xl px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+              className="w-full bg-muted/50 rounded-xl px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 border border-border/30 focus:border-primary/40 transition-all"
             />
           </div>
           <div className="relative">
             <button
               onClick={() => setShowEmoji(!showEmoji)}
-              className={cn('p-2 rounded-lg transition-colors', showEmoji ? 'bg-primary/10 text-primary' : 'hover:bg-muted text-muted-foreground')}
+              className={cn('p-2.5 rounded-xl transition-all', showEmoji ? 'bg-primary/15 text-primary' : 'hover:bg-primary/10 text-primary/60')}
             >
               <Smile className={cn('w-5 h-5', iconAnimClass)} />
             </button>
@@ -239,8 +243,10 @@ export function ChatWindow({
             onClick={handleSend}
             disabled={!input.trim()}
             className={cn(
-              'p-2 rounded-lg transition-all',
-              input.trim() ? 'bg-primary text-primary-foreground hover:bg-primary/90' : 'text-muted-foreground',
+              'p-2.5 rounded-xl transition-all',
+              input.trim()
+                ? 'bg-gradient-to-r from-primary to-accent text-white shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30'
+                : 'text-muted-foreground/40',
             )}
           >
             <SendHorizontal className={cn('w-5 h-5', iconAnimClass)} />
