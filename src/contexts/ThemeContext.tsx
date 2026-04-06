@@ -25,22 +25,27 @@ function saveId(id: string | null) {
 /** Apply a theme's CSS variables, font, and body background to the document. */
 function applyTheme(theme: FullTheme | null) {
   const root = document.documentElement;
+  const body = document.body;
   if (!theme) {
-    // Reset to defaults — remove all inline styles set by themes.
     root.removeAttribute('style');
     root.removeAttribute('data-theme');
-    document.body.style.backgroundImage = '';
-    document.body.style.backgroundAttachment = '';
-    document.body.style.backgroundSize = '';
+    body.style.backgroundImage = '';
+    body.style.backgroundSize = '';
+    body.style.backgroundAttachment = '';
+    body.style.backgroundRepeat = '';
     return;
   }
+  // Apply CSS variables.
   for (const [key, value] of Object.entries(theme.vars)) {
     root.style.setProperty(key, value);
   }
   root.style.fontFamily = theme.font;
-  document.body.style.backgroundImage = theme.bodyBg;
-  document.body.style.backgroundAttachment = 'fixed';
-  document.body.style.backgroundSize = theme.bgSize || 'auto';
+
+  // Apply background pattern to body.
+  body.style.backgroundImage = theme.bodyBg;
+  body.style.backgroundSize = theme.bgSize || 'auto';
+  body.style.backgroundAttachment = 'fixed';
+  body.style.backgroundRepeat = 'repeat';
 
   // Set data-theme attribute for CSS-only theme overrides (e.g. anime).
   if (theme.id === 'anime') {
