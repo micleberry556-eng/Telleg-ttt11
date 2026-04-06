@@ -243,7 +243,7 @@ export function ChatList({
                 : 'text-muted-foreground hover:text-foreground hover:bg-muted/30',
             )}
           >
-            <span className={cn(effectiveTab === t.key && iconAnimClass)}>{t.icon}</span>
+            <span>{t.icon}</span>
             {t.label}
             {effectiveTab === t.key && (
               <motion.div
