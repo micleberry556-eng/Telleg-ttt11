@@ -28,6 +28,7 @@ function applyTheme(theme: FullTheme | null) {
   if (!theme) {
     // Reset to defaults — remove all inline styles set by themes.
     root.removeAttribute('style');
+    root.removeAttribute('data-theme');
     document.body.style.backgroundImage = '';
     return;
   }
@@ -36,6 +37,13 @@ function applyTheme(theme: FullTheme | null) {
   }
   root.style.fontFamily = theme.font;
   document.body.style.backgroundImage = theme.bodyBg;
+
+  // Set data-theme attribute for CSS-only theme overrides (e.g. anime).
+  if (theme.id === 'anime') {
+    root.setAttribute('data-theme', 'anime');
+  } else {
+    root.removeAttribute('data-theme');
+  }
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
