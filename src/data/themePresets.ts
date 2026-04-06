@@ -64,6 +64,69 @@ export interface VariantRules {
   };
 }
 
+/* ── Surface & header style types ── */
+
+export type SurfaceStyle =
+  | 'glass'
+  | 'neumorphic'
+  | 'gradient-border'
+  | 'frosted'
+  | 'neon-outline'
+  | 'paper'
+  | 'holographic';
+
+export type ThemeHeaderStyle =
+  | 'glass'
+  | 'gradient'
+  | 'solid'
+  | 'transparent'
+  | 'neon';
+
+export type IconAnimation =
+  | 'none'
+  | 'pulse'
+  | 'bounce'
+  | 'spin'
+  | 'wiggle'
+  | 'glow'
+  | 'float'
+  | 'shake';
+
+export function getSurfaceClass(style: SurfaceStyle): string {
+  switch (style) {
+    case 'glass': return 'glass-card';
+    case 'neumorphic': return 'theme-surface-neumorphic';
+    case 'gradient-border': return 'theme-surface-gradient-border';
+    case 'frosted': return 'theme-surface-frosted';
+    case 'neon-outline': return 'theme-surface-neon-outline';
+    case 'paper': return 'theme-surface-paper';
+    case 'holographic': return 'theme-surface-holographic';
+  }
+}
+
+export function getHeaderClass(style: ThemeHeaderStyle): string {
+  switch (style) {
+    case 'glass': return 'glass';
+    case 'gradient': return 'theme-header-gradient';
+    case 'solid': return 'theme-header-solid';
+    case 'transparent': return 'theme-header-transparent';
+    case 'neon': return 'theme-header-neon';
+  }
+}
+
+export function getIconAnimClass(anim: IconAnimation): string {
+  switch (anim) {
+    case 'none': return '';
+    case 'pulse': return 'icon-anim-pulse';
+    case 'bounce': return 'icon-anim-bounce';
+    case 'spin': return 'icon-anim-spin';
+    case 'wiggle': return 'icon-anim-wiggle';
+    case 'glow': return 'icon-anim-glow';
+    case 'float': return 'icon-anim-float';
+    case 'shake': return 'icon-anim-shake';
+  }
+}
+
 /* ── Theme preset definition ── */
 
 export interface ThemePreset {
@@ -83,6 +146,12 @@ export interface ThemePreset {
   icons: ThemeIconSets;
   /** Variant generation rules. */
   variantRules: VariantRules;
+  /** Surface style for cards and panels. */
+  surfaceStyle: SurfaceStyle;
+  /** Header visual style. */
+  headerStyle: ThemeHeaderStyle;
+  /** Icon animation type. */
+  iconAnimation: IconAnimation;
 }
 
 /* ── Seed-based variation engine ── */
@@ -219,9 +288,13 @@ function p(
   config: AppearanceConfig, css: Record<string, string>,
   hues: number[], layouts: LayoutVariant[],
   placements: MessengerPlacements, modifiers: LayoutModifier[],
-  icons: ThemeIconSets, rules?: VariantRules,
+  icons: ThemeIconSets,
+  surface: SurfaceStyle = 'glass',
+  header: ThemeHeaderStyle = 'glass',
+  iconAnim: IconAnimation = 'none',
+  rules?: VariantRules,
 ): ThemePreset {
-  return { id, name, description: desc, emoji, config, cssOverrides: css, accentHues: hues, layoutVariants: layouts, placements, modifiers, icons, variantRules: rules || defaultRules };
+  return { id, name, description: desc, emoji, config, cssOverrides: css, accentHues: hues, layoutVariants: layouts, placements, modifiers, icons, variantRules: rules || defaultRules, surfaceStyle: surface, headerStyle: header, iconAnimation: iconAnim };
 }
 
 const C = (overrides: Partial<AppearanceConfig>): AppearanceConfig => ({
@@ -234,185 +307,242 @@ const C = (overrides: Partial<AppearanceConfig>): AppearanceConfig => ({
 /* ── 30 Theme presets ── */
 
 export const THEME_PRESETS: ThemePreset[] = [
-  // 1-10
-  p('midnight-violet', 'Полночный фиолет', 'Глубокий тёмный с фиолетовыми акцентами', '🌌',
+  // 1 — Midnight Violet: deep purple glow, floating panels, holographic surfaces, pulsing icons
+  p('midnight-violet', 'Полночный фиолет', 'Глубокий тёмный с фиолетовыми акцентами и голографическими панелями', '🌌',
     C({}), { '--background': '250 25% 5%', '--card': '250 20% 8%' }, [262, 280, 290],
-    [LV_CLASSIC_LEFT, LV_FLOATING, LV_WIDE_LEFT, LV_CLASSIC_RIGHT, LV_CARD_LEFT],
-    PL_STANDARD, ['glowAccents', 'roundedPanels', 'gradientHeader'], ICONS_STANDARD),
+    [LV_FLOATING, LV_CARD_LEFT, LV_WIDE_LEFT, LV_CLASSIC_RIGHT, LV_FLOATING_NARROW],
+    PL_STANDARD, ['glowAccents', 'roundedPanels', 'gradientHeader', 'separatedPanels'], ICONS_STANDARD,
+    'holographic', 'gradient', 'pulse'),
 
-  p('ocean-blue', 'Океан', 'Спокойный синий как глубокое море', '🌊',
+  // 2 — Ocean: calm blue, classic layout, frosted glass, floating icons
+  p('ocean-blue', 'Океан', 'Спокойный синий с матовым стеклом и плавающими элементами', '🌊',
     C({ colorTheme: 'blue', bubbleStyle: 'classic', chatBackground: 'gradient', fontFamily: 'inter', borderRadius: 'large' }),
     { '--background': '215 30% 6%', '--card': '215 25% 9%' }, [210, 220, 200],
     [LV_CLASSIC_LEFT, LV_CLASSIC_RIGHT, LV_FLOATING, LV_NARROW_LEFT, LV_SPLIT],
-    PL_STANDARD, ['stickyHeader', 'roundedPanels'], ICONS_STANDARD),
+    PL_STANDARD, ['stickyHeader', 'roundedPanels'], ICONS_STANDARD,
+    'frosted', 'solid', 'float'),
 
-  p('emerald-forest', 'Изумрудный лес', 'Природные зелёные тона', '🌲',
+  // 3 — Emerald Forest: nature green, paper surfaces, wide layout, no animations
+  p('emerald-forest', 'Изумрудный лес', 'Природные зелёные тона с текстурой бумаги', '🌲',
     C({ colorTheme: 'green', chatBackground: 'aurora', fontFamily: 'roboto', glassEffects: false }),
     { '--background': '160 20% 5%', '--card': '160 15% 8%' }, [152, 140, 165],
-    [LV_CLASSIC_LEFT, LV_WIDE_LEFT, LV_NARROW_RIGHT, LV_COMPACT],
-    PL_STANDARD, ['stickyHeader', 'denseList'], ICONS_STANDARD),
+    [LV_WIDE_LEFT, LV_CLASSIC_LEFT, LV_NARROW_RIGHT, LV_COMPACT],
+    PL_STANDARD, ['stickyHeader', 'denseList'], ICONS_STANDARD,
+    'paper', 'solid', 'none'),
 
-  p('sakura-pink', 'Сакура', 'Нежный розовый японский стиль', '🌸',
+  // 4 — Sakura: soft pink, floating panels, gradient borders, wiggling icons
+  p('sakura-pink', 'Сакура', 'Нежный розовый с градиентными рамками и анимированными иконками', '🌸',
     C({ colorTheme: 'pink', bubbleStyle: 'pill', chatBackground: 'dots', fontFamily: 'montserrat', borderRadius: 'full' }),
     { '--background': '330 15% 6%', '--card': '330 12% 9%' }, [330, 340, 320],
-    [LV_FLOATING, LV_FLOATING_RIGHT, LV_CLASSIC_LEFT, LV_WIDE_LEFT, LV_FLOATING_NARROW],
-    PL_RIGHT_MENU, ['roundedPanels', 'separatedPanels', 'glowAccents'], ICONS_STANDARD),
+    [LV_FLOATING_NARROW, LV_FLOATING_RIGHT, LV_CARD_RIGHT, LV_WIDE_LEFT, LV_FLOATING],
+    PL_RIGHT_MENU, ['roundedPanels', 'separatedPanels', 'glowAccents', 'floatingInput'], ICONS_STANDARD,
+    'gradient-border', 'gradient', 'wiggle'),
 
-  p('sunset-orange', 'Закат', 'Тёплые оранжевые тона заката', '🌅',
+  // 5 — Sunset: warm orange, neumorphic surfaces, gradient header, bouncing icons
+  p('sunset-orange', 'Закат', 'Тёплые оранжевые тона с объёмными панелями', '🌅',
     C({ colorTheme: 'orange', bubbleStyle: 'classic', chatBackground: 'gradient' }),
     { '--background': '25 20% 5%', '--card': '25 15% 8%' }, [25, 15, 35],
-    [LV_CLASSIC_LEFT, LV_CLASSIC_RIGHT, LV_FLOATING, LV_NARROW_LEFT],
-    PL_STANDARD, ['gradientHeader', 'glowAccents'], ICONS_STANDARD),
+    [LV_CLASSIC_LEFT, LV_CLASSIC_RIGHT, LV_CARD_LEFT, LV_NARROW_LEFT],
+    PL_STANDARD, ['gradientHeader', 'glowAccents', 'roundedPanels'], ICONS_STANDARD,
+    'neumorphic', 'gradient', 'bounce'),
 
-  p('arctic-teal', 'Арктика', 'Холодный бирюзовый лёд', '🧊',
+  // 6 — Arctic: cold teal, minimal paper, compact, no icon animation
+  p('arctic-teal', 'Арктика', 'Холодный бирюзовый с минималистичным дизайном', '🧊',
     C({ colorTheme: 'teal', fontSize: 'small', bubbleStyle: 'rect', chatBackground: 'mesh', fontFamily: 'inter', uiScale: 'compact', borderRadius: 'small', sidebarWidth: 'narrow', animations: false, glassEffects: false, compactMessages: true }),
     { '--background': '180 20% 5%', '--card': '180 15% 8%' }, [180, 170, 190],
-    [LV_COMPACT, LV_NARROW_LEFT, LV_NARROW_RIGHT, LV_CLASSIC_LEFT, LV_MINIMAL],
-    PL_COMPACT, ['compactMessages', 'denseList', 'stickyHeader'], ICONS_MINIMAL),
+    [LV_MINIMAL, LV_NARROW_LEFT, LV_NARROW_RIGHT, LV_COMPACT, LV_CLASSIC_LEFT],
+    PL_COMPACT, ['compactMessages', 'denseList', 'stickyHeader'], ICONS_MINIMAL,
+    'paper', 'transparent', 'none'),
 
-  p('crimson-fire', 'Пламя', 'Огненный красный стиль', '🔥',
+  // 7 — Crimson Fire: aggressive red, neon outlines, sharp edges, shaking icons
+  p('crimson-fire', 'Пламя', 'Огненный красный с неоновыми контурами', '🔥',
     C({ colorTheme: 'red', bubbleStyle: 'sharp', chatBackground: 'dark', fontFamily: 'roboto', borderRadius: 'none', glassEffects: false }),
     { '--background': '0 15% 5%', '--card': '0 12% 8%' }, [0, 350, 10],
-    [LV_CLASSIC_LEFT, LV_CLASSIC_RIGHT, LV_NARROW_LEFT, LV_COMPACT, LV_SPLIT],
-    PL_STANDARD, ['stickyHeader', 'denseList'], ICONS_BOLD),
+    [LV_SPLIT, LV_CLASSIC_LEFT, LV_NARROW_LEFT, LV_COMPACT, LV_CLASSIC_RIGHT],
+    PL_STANDARD, ['stickyHeader', 'denseList', 'glowAccents'], ICONS_BOLD,
+    'neon-outline', 'neon', 'shake'),
 
-  p('royal-indigo', 'Королевский', 'Благородный индиго', '👑',
+  // 8 — Royal Indigo: luxurious, holographic, wide spacious, glowing icons
+  p('royal-indigo', 'Королевский', 'Благородный индиго с голографическими поверхностями', '👑',
     C({ colorTheme: 'indigo', fontSize: 'large', chatBackground: 'aurora', fontFamily: 'montserrat', uiScale: 'spacious', borderRadius: 'large', sidebarWidth: 'wide' }),
     { '--background': '240 25% 5%', '--card': '240 20% 8%' }, [240, 250, 230],
-    [LV_WIDE_LEFT, LV_FLOATING, LV_CLASSIC_LEFT, LV_FLOATING_RIGHT, LV_ULTRA_WIDE],
-    PL_STANDARD, ['roundedPanels', 'separatedPanels', 'glowAccents', 'gradientHeader'], ICONS_STANDARD),
+    [LV_ULTRA_WIDE, LV_WIDE_LEFT, LV_CARD_LEFT, LV_FLOATING_RIGHT, LV_FLOATING],
+    PL_STANDARD, ['roundedPanels', 'separatedPanels', 'glowAccents', 'gradientHeader'], ICONS_STANDARD,
+    'holographic', 'gradient', 'glow'),
 
-  p('cyber-cyan', 'Кибер', 'Неоновый киберпанк', '🤖',
+  // 9 — Cyber: neon cyberpunk, neon outlines, compact, pulsing icons
+  p('cyber-cyan', 'Кибер', 'Неоновый киберпанк с пульсирующими элементами', '🤖',
     C({ colorTheme: 'cyan', fontSize: 'small', bubbleStyle: 'sharp', chatBackground: 'mesh', uiScale: 'compact', borderRadius: 'none', sidebarWidth: 'narrow', showTimestamps: false, compactMessages: true }),
     { '--background': '190 25% 4%', '--card': '190 20% 7%' }, [190, 180, 200],
-    [LV_COMPACT, LV_NARROW_LEFT, LV_CLASSIC_LEFT, LV_NARROW_RIGHT, LV_SPLIT],
-    PL_COMPACT, ['compactMessages', 'denseList', 'glowAccents'], ICONS_BOLD),
+    [LV_COMPACT, LV_NARROW_LEFT, LV_SPLIT, LV_NARROW_RIGHT, LV_CLASSIC_LEFT],
+    PL_COMPACT, ['compactMessages', 'denseList', 'glowAccents'], ICONS_BOLD,
+    'neon-outline', 'neon', 'pulse'),
 
-  p('golden-amber', 'Золотой', 'Роскошный золотой стиль', '✨',
+  // 10 — Golden Amber: luxury gold, gradient borders, classic layout, floating icons
+  p('golden-amber', 'Золотой', 'Роскошный золотой с градиентными рамками', '✨',
     C({ colorTheme: 'amber', bubbleStyle: 'classic', chatBackground: 'gradient', fontFamily: 'montserrat' }),
     { '--background': '38 20% 5%', '--card': '38 15% 8%' }, [38, 45, 30],
-    [LV_CLASSIC_LEFT, LV_FLOATING, LV_WIDE_LEFT, LV_CLASSIC_RIGHT, LV_CARD_LEFT],
-    PL_STANDARD, ['glowAccents', 'gradientHeader', 'roundedPanels'], ICONS_STANDARD),
+    [LV_CARD_LEFT, LV_CLASSIC_LEFT, LV_FLOATING, LV_WIDE_LEFT, LV_CLASSIC_RIGHT],
+    PL_STANDARD, ['glowAccents', 'gradientHeader', 'roundedPanels', 'separatedPanels'], ICONS_STANDARD,
+    'gradient-border', 'gradient', 'float'),
 
-  // 11-20
-  p('minimal-mono', 'Минимализм', 'Чистый монохромный дизайн', '⬜',
+  // 11 — Minimalism: monochrome, paper surfaces, no animations, transparent header
+  p('minimal-mono', 'Минимализм', 'Чистый монохромный дизайн без отвлекающих элементов', '⬜',
     C({ colorTheme: 'blue', bubbleStyle: 'rect', fontFamily: 'inter', borderRadius: 'small', animations: false, glassEffects: false }),
     { '--background': '0 0% 5%', '--card': '0 0% 8%', '--primary': '0 0% 70%' }, [],
-    [LV_CLASSIC_LEFT, LV_NARROW_LEFT, LV_COMPACT, LV_CLASSIC_RIGHT, LV_MINIMAL],
-    PL_STORIES_HIDDEN, ['compactMessages', 'stickyHeader'], ICONS_MINIMAL),
+    [LV_MINIMAL, LV_NARROW_LEFT, LV_COMPACT, LV_CLASSIC_LEFT, LV_CLASSIC_RIGHT],
+    PL_STORIES_HIDDEN, ['compactMessages', 'stickyHeader'], ICONS_MINIMAL,
+    'paper', 'transparent', 'none'),
 
-  p('neon-nights', 'Неон', 'Яркие неоновые огни ночного города', '🌃',
+  // 12 — Neon Nights: bright neon, holographic, floating panels, glowing icons
+  p('neon-nights', 'Неон', 'Яркие неоновые огни с голографическими панелями', '🌃',
     C({ colorTheme: 'pink', bubbleStyle: 'pill', chatBackground: 'dark', borderRadius: 'full' }),
     { '--background': '280 20% 4%', '--card': '280 15% 7%' }, [330, 280, 200],
-    [LV_FLOATING, LV_FLOATING_RIGHT, LV_CLASSIC_LEFT, LV_WIDE_LEFT, LV_CARD_LEFT],
-    PL_STANDARD, ['glowAccents', 'roundedPanels', 'separatedPanels', 'floatingInput'], ICONS_BOLD),
+    [LV_FLOATING, LV_FLOATING_RIGHT, LV_CARD_LEFT, LV_CARD_RIGHT, LV_WIDE_LEFT],
+    PL_STANDARD, ['glowAccents', 'roundedPanels', 'separatedPanels', 'floatingInput'], ICONS_BOLD,
+    'holographic', 'neon', 'glow'),
 
-  p('earth-tones', 'Земля', 'Тёплые природные тона', '🍂',
+  // 13 — Earth Tones: warm natural, neumorphic, wide layout, no icon animation
+  p('earth-tones', 'Земля', 'Тёплые природные тона с объёмными поверхностями', '🍂',
     C({ colorTheme: 'orange', bubbleStyle: 'classic', fontFamily: 'roboto', glassEffects: false }),
     { '--background': '30 15% 6%', '--card': '30 12% 9%' }, [25, 35, 15],
-    [LV_CLASSIC_LEFT, LV_WIDE_LEFT, LV_CLASSIC_RIGHT, LV_NARROW_LEFT],
-    PL_STANDARD, ['stickyHeader'], ICONS_STANDARD),
+    [LV_WIDE_LEFT, LV_CLASSIC_LEFT, LV_CLASSIC_RIGHT, LV_NARROW_LEFT],
+    PL_STANDARD, ['stickyHeader', 'roundedPanels'], ICONS_STANDARD,
+    'neumorphic', 'solid', 'none'),
 
-  p('lavender-dream', 'Лаванда', 'Мягкий лавандовый сон', '💜',
+  // 14 — Lavender Dream: soft purple, frosted glass, spacious, wiggling icons
+  p('lavender-dream', 'Лаванда', 'Мягкий лавандовый с матовым стеклом', '💜',
     C({ colorTheme: 'purple', fontSize: 'large', chatBackground: 'aurora', fontFamily: 'montserrat', uiScale: 'spacious', borderRadius: 'large', sidebarWidth: 'wide' }),
     { '--background': '270 20% 6%', '--card': '270 15% 9%' }, [270, 260, 280],
-    [LV_WIDE_LEFT, LV_FLOATING, LV_FLOATING_RIGHT, LV_CLASSIC_LEFT, LV_CARD_RIGHT],
-    PL_STANDARD, ['roundedPanels', 'separatedPanels', 'glowAccents'], ICONS_STANDARD),
+    [LV_CARD_RIGHT, LV_WIDE_LEFT, LV_FLOATING, LV_FLOATING_RIGHT, LV_CLASSIC_LEFT],
+    PL_STANDARD, ['roundedPanels', 'separatedPanels', 'glowAccents'], ICONS_STANDARD,
+    'frosted', 'gradient', 'wiggle'),
 
-  p('matrix-green', 'Матрица', 'Зелёный код в стиле Matrix', '💚',
+  // 15 — Matrix: hacker green, neon outlines, compact, pulsing icons
+  p('matrix-green', 'Матрица', 'Зелёный код с неоновыми контурами', '💚',
     C({ colorTheme: 'green', fontSize: 'small', bubbleStyle: 'sharp', chatBackground: 'mesh', uiScale: 'compact', borderRadius: 'none', sidebarWidth: 'narrow', showTimestamps: false, compactMessages: true, glassEffects: false }),
     { '--background': '120 20% 3%', '--card': '120 15% 6%' }, [120, 130, 140],
-    [LV_COMPACT, LV_NARROW_LEFT, LV_NARROW_RIGHT, LV_CLASSIC_LEFT, LV_MINIMAL],
-    PL_COMPACT, ['compactMessages', 'denseList'], ICONS_MINIMAL),
+    [LV_COMPACT, LV_NARROW_LEFT, LV_SPLIT, LV_NARROW_RIGHT, LV_MINIMAL],
+    PL_COMPACT, ['compactMessages', 'denseList'], ICONS_MINIMAL,
+    'neon-outline', 'neon', 'pulse'),
 
-  p('coral-reef', 'Коралл', 'Подводный мир кораллов', '🐠',
+  // 16 — Coral Reef: underwater, frosted glass, floating layout, bouncing icons
+  p('coral-reef', 'Коралл', 'Подводный мир с матовым стеклом и плавающими панелями', '🐠',
     C({ colorTheme: 'red', chatBackground: 'waves', fontFamily: 'inter' }),
     { '--background': '10 18% 5%', '--card': '10 14% 8%' }, [10, 350, 20],
-    [LV_CLASSIC_LEFT, LV_FLOATING, LV_CLASSIC_RIGHT, LV_WIDE_LEFT],
-    PL_STANDARD, ['roundedPanels', 'glowAccents'], ICONS_STANDARD),
+    [LV_FLOATING, LV_FLOATING_NARROW, LV_CLASSIC_LEFT, LV_WIDE_LEFT],
+    PL_STANDARD, ['roundedPanels', 'glowAccents', 'separatedPanels', 'floatingInput'], ICONS_STANDARD,
+    'frosted', 'gradient', 'bounce'),
 
-  p('space-dark', 'Космос', 'Глубокий космический мрак', '🚀',
+  // 17 — Space: deep cosmos, holographic, immersive, spinning icons
+  p('space-dark', 'Космос', 'Глубокий космос с голографическими панелями', '🚀',
     C({ colorTheme: 'indigo', bubbleStyle: 'classic', chatBackground: 'stars' }),
     { '--background': '240 30% 3%', '--card': '240 25% 6%' }, [240, 260, 220],
-    [LV_CLASSIC_LEFT, LV_FLOATING, LV_FLOATING_RIGHT, LV_NARROW_LEFT, LV_CARD_LEFT],
-    PL_STANDARD, ['immersiveChat', 'glowAccents', 'gradientHeader'], ICONS_BOLD),
+    [LV_CARD_LEFT, LV_FLOATING, LV_FLOATING_RIGHT, LV_NARROW_LEFT, LV_CLASSIC_LEFT],
+    PL_STANDARD, ['immersiveChat', 'glowAccents', 'gradientHeader', 'roundedPanels'], ICONS_BOLD,
+    'holographic', 'gradient', 'spin'),
 
-  p('pastel-soft', 'Пастель', 'Мягкие пастельные тона', '🎨',
+  // 18 — Pastel: soft tones, gradient borders, spacious, floating icons
+  p('pastel-soft', 'Пастель', 'Мягкие пастельные тона с градиентными рамками', '🎨',
     C({ colorTheme: 'teal', bubbleStyle: 'pill', chatBackground: 'gradient', fontFamily: 'montserrat', uiScale: 'spacious', borderRadius: 'full', sidebarWidth: 'wide' }),
     { '--background': '180 15% 7%', '--card': '180 12% 10%' }, [180, 200, 160],
-    [LV_WIDE_LEFT, LV_FLOATING, LV_CLASSIC_LEFT, LV_FLOATING_RIGHT],
-    PL_RIGHT_MENU, ['roundedPanels', 'separatedPanels'], ICONS_STANDARD),
+    [LV_CARD_RIGHT, LV_WIDE_LEFT, LV_FLOATING, LV_FLOATING_RIGHT],
+    PL_RIGHT_MENU, ['roundedPanels', 'separatedPanels', 'floatingInput'], ICONS_STANDARD,
+    'gradient-border', 'solid', 'float'),
 
-  p('hacker-terminal', 'Терминал', 'Стиль хакерского терминала', '💻',
+  // 19 — Terminal: hacker style, paper surfaces, immersive, no animation
+  p('hacker-terminal', 'Терминал', 'Стиль хакерского терминала с минимальным интерфейсом', '💻',
     C({ colorTheme: 'green', fontSize: 'tiny', bubbleStyle: 'sharp', chatBackground: 'dark', fontFamily: 'roboto', uiScale: 'compact', borderRadius: 'none', sidebarWidth: 'narrow', animations: false, glassEffects: false, compactMessages: true }),
     { '--background': '0 0% 2%', '--card': '0 0% 5%' }, [120, 130],
-    [LV_COMPACT, LV_NARROW_LEFT, LV_NARROW_RIGHT, LV_CLASSIC_LEFT, LV_MINIMAL],
-    PL_IMMERSIVE, ['compactMessages', 'denseList', 'stickyHeader'], ICONS_MINIMAL),
+    [LV_MINIMAL, LV_COMPACT, LV_NARROW_LEFT, LV_NARROW_RIGHT, LV_CLASSIC_LEFT],
+    PL_IMMERSIVE, ['compactMessages', 'denseList', 'stickyHeader'], ICONS_MINIMAL,
+    'paper', 'transparent', 'none'),
 
-  p('aurora-borealis', 'Северное сияние', 'Переливы полярного сияния', '🌈',
+  // 20 — Aurora Borealis: colorful, frosted glass, wide, glowing icons
+  p('aurora-borealis', 'Северное сияние', 'Переливы полярного сияния с матовым стеклом', '🌈',
     C({ colorTheme: 'cyan', chatBackground: 'aurora', borderRadius: 'large' }),
     { '--background': '200 25% 5%', '--card': '200 20% 8%' }, [190, 160, 270, 300],
-    [LV_CLASSIC_LEFT, LV_FLOATING, LV_CLASSIC_RIGHT, LV_WIDE_LEFT, LV_CARD_LEFT],
-    PL_STANDARD, ['glowAccents', 'roundedPanels', 'gradientHeader', 'separatedPanels'], ICONS_STANDARD),
+    [LV_WIDE_LEFT, LV_FLOATING, LV_CARD_LEFT, LV_CLASSIC_RIGHT, LV_CLASSIC_LEFT],
+    PL_STANDARD, ['glowAccents', 'roundedPanels', 'gradientHeader', 'separatedPanels'], ICONS_STANDARD,
+    'frosted', 'gradient', 'glow'),
 
-  // 21-30
-  p('volcanic-red', 'Вулкан', 'Раскалённая лава и пепел', '🌋',
+  // 21 — Volcano: hot red, neumorphic, split layout, shaking icons
+  p('volcanic-red', 'Вулкан', 'Раскалённая лава с объёмными панелями', '🌋',
     C({ colorTheme: 'red', bubbleStyle: 'sharp', chatBackground: 'dark', fontFamily: 'roboto', borderRadius: 'small', glassEffects: false }),
     { '--background': '5 18% 4%', '--card': '5 14% 7%' }, [0, 8, 355],
-    [LV_CLASSIC_LEFT, LV_SPLIT, LV_NARROW_LEFT, LV_CARD_LEFT, LV_COMPACT],
-    PL_STANDARD, ['stickyHeader', 'denseList', 'glowAccents'], ICONS_BOLD),
+    [LV_SPLIT, LV_CLASSIC_LEFT, LV_NARROW_LEFT, LV_CARD_LEFT, LV_COMPACT],
+    PL_STANDARD, ['stickyHeader', 'denseList', 'glowAccents'], ICONS_BOLD,
+    'neumorphic', 'solid', 'shake'),
 
-  p('mint-breeze', 'Мятный бриз', 'Свежий мятный ветер', '🍃',
+  // 22 — Mint Breeze: fresh teal, gradient borders, floating, wiggling icons
+  p('mint-breeze', 'Мятный бриз', 'Свежий мятный с градиентными рамками и плавающими панелями', '🍃',
     C({ colorTheme: 'teal', bubbleStyle: 'pill', chatBackground: 'gradient', fontFamily: 'montserrat', borderRadius: 'full', uiScale: 'spacious' }),
     { '--background': '165 18% 5%', '--card': '165 14% 8%' }, [165, 155, 175],
-    [LV_FLOATING, LV_FLOATING_NARROW, LV_WIDE_LEFT, LV_CARD_RIGHT],
-    PL_RIGHT_MENU, ['roundedPanels', 'separatedPanels', 'floatingInput'], ICONS_STANDARD),
+    [LV_FLOATING_NARROW, LV_FLOATING, LV_CARD_RIGHT, LV_WIDE_LEFT],
+    PL_RIGHT_MENU, ['roundedPanels', 'separatedPanels', 'floatingInput'], ICONS_STANDARD,
+    'gradient-border', 'gradient', 'wiggle'),
 
-  p('deep-ocean', 'Глубина', 'Тёмная бездна океана', '🐋',
+  // 23 — Deep Ocean: dark blue, frosted glass, immersive, floating icons
+  p('deep-ocean', 'Глубина', 'Тёмная бездна с матовым стеклом', '🐋',
     C({ colorTheme: 'blue', fontSize: 'small', bubbleStyle: 'classic', chatBackground: 'waves', fontFamily: 'inter', borderRadius: 'medium' }),
     { '--background': '220 28% 4%', '--card': '220 22% 7%' }, [215, 225, 205],
-    [LV_CLASSIC_LEFT, LV_CLASSIC_RIGHT, LV_NARROW_RIGHT, LV_FLOATING, LV_SPLIT],
-    PL_STANDARD, ['immersiveChat', 'stickyHeader'], ICONS_STANDARD),
+    [LV_CLASSIC_LEFT, LV_CLASSIC_RIGHT, LV_FLOATING, LV_NARROW_RIGHT, LV_SPLIT],
+    PL_STANDARD, ['immersiveChat', 'stickyHeader', 'roundedPanels'], ICONS_STANDARD,
+    'frosted', 'solid', 'float'),
 
-  p('rose-gold', 'Розовое золото', 'Элегантный розово-золотой', '🌹',
+  // 24 — Rose Gold: elegant pink-gold, holographic, ultra-wide, pulsing icons
+  p('rose-gold', 'Розовое золото', 'Элегантный розово-золотой с голографическими панелями', '🌹',
     C({ colorTheme: 'pink', bubbleStyle: 'rounded', chatBackground: 'aurora', fontFamily: 'montserrat', borderRadius: 'large', uiScale: 'spacious', sidebarWidth: 'wide' }),
     { '--background': '340 15% 5%', '--card': '340 12% 8%' }, [340, 25, 330],
-    [LV_WIDE_LEFT, LV_CARD_LEFT, LV_FLOATING, LV_ULTRA_WIDE],
-    PL_STANDARD, ['roundedPanels', 'glowAccents', 'gradientHeader', 'separatedPanels'], ICONS_STANDARD),
+    [LV_ULTRA_WIDE, LV_WIDE_LEFT, LV_CARD_LEFT, LV_FLOATING],
+    PL_STANDARD, ['roundedPanels', 'glowAccents', 'gradientHeader', 'separatedPanels'], ICONS_STANDARD,
+    'holographic', 'gradient', 'pulse'),
 
-  p('electric-storm', 'Шторм', 'Электрическая буря', '⚡',
+  // 25 — Electric Storm: amber, neon outlines, split layout, shaking icons
+  p('electric-storm', 'Шторм', 'Электрическая буря с неоновыми контурами', '⚡',
     C({ colorTheme: 'amber', fontSize: 'medium', bubbleStyle: 'sharp', chatBackground: 'mesh', fontFamily: 'space', borderRadius: 'none', glassEffects: false }),
     { '--background': '45 15% 4%', '--card': '45 12% 7%' }, [45, 35, 55],
-    [LV_CLASSIC_LEFT, LV_SPLIT, LV_COMPACT, LV_NARROW_LEFT, LV_CLASSIC_RIGHT],
-    PL_STANDARD, ['stickyHeader', 'denseList', 'glowAccents'], ICONS_BOLD),
+    [LV_SPLIT, LV_CLASSIC_LEFT, LV_COMPACT, LV_NARROW_LEFT, LV_CLASSIC_RIGHT],
+    PL_STANDARD, ['stickyHeader', 'denseList', 'glowAccents'], ICONS_BOLD,
+    'neon-outline', 'neon', 'shake'),
 
-  p('zen-garden', 'Дзен', 'Спокойствие японского сада', '🎋',
+  // 26 — Zen Garden: calm green, paper surfaces, spacious, no animation
+  p('zen-garden', 'Дзен', 'Спокойствие японского сада с текстурой бумаги', '🎋',
     C({ colorTheme: 'green', fontSize: 'large', bubbleStyle: 'classic', chatBackground: 'default', fontFamily: 'inter', borderRadius: 'medium', uiScale: 'spacious' }),
     { '--background': '145 12% 6%', '--card': '145 10% 9%' }, [145, 135, 155],
-    [LV_WIDE_LEFT, LV_FLOATING_NARROW, LV_CLASSIC_LEFT, LV_CARD_LEFT],
-    PL_STANDARD, ['roundedPanels', 'separatedPanels'], ICONS_STANDARD),
+    [LV_CARD_LEFT, LV_WIDE_LEFT, LV_FLOATING_NARROW, LV_CLASSIC_LEFT],
+    PL_STANDARD, ['roundedPanels', 'separatedPanels'], ICONS_STANDARD,
+    'paper', 'transparent', 'none'),
 
-  p('synthwave', 'Синтвейв', 'Ретро-футуризм 80-х', '🎹',
+  // 27 — Synthwave: retro-futurism, holographic, floating, glowing icons
+  p('synthwave', 'Синтвейв', 'Ретро-футуризм 80-х с голографическими панелями', '🎹',
     C({ colorTheme: 'pink', bubbleStyle: 'pill', chatBackground: 'dark', fontFamily: 'space', borderRadius: 'full', glassEffects: true }),
     { '--background': '290 22% 4%', '--card': '290 18% 7%' }, [320, 280, 190],
-    [LV_FLOATING, LV_FLOATING_RIGHT, LV_CARD_LEFT, LV_CARD_RIGHT, LV_NARROW_LEFT],
-    PL_STANDARD, ['glowAccents', 'roundedPanels', 'separatedPanels', 'floatingInput', 'gradientHeader'], ICONS_BOLD),
+    [LV_CARD_LEFT, LV_CARD_RIGHT, LV_FLOATING, LV_FLOATING_RIGHT, LV_NARROW_LEFT],
+    PL_STANDARD, ['glowAccents', 'roundedPanels', 'separatedPanels', 'floatingInput', 'gradientHeader'], ICONS_BOLD,
+    'holographic', 'neon', 'glow'),
 
-  p('carbon-fiber', 'Карбон', 'Технологичный углеродный стиль', '⚙️',
+  // 28 — Carbon Fiber: tech, neumorphic, compact, no animation
+  p('carbon-fiber', 'Карбон', 'Технологичный углеродный с объёмными поверхностями', '⚙️',
     C({ colorTheme: 'blue', fontSize: 'small', bubbleStyle: 'rect', chatBackground: 'mesh', fontFamily: 'roboto', borderRadius: 'small', uiScale: 'compact', glassEffects: false, compactMessages: true }),
     { '--background': '210 10% 4%', '--card': '210 8% 7%' }, [210, 200, 220],
-    [LV_COMPACT, LV_MINIMAL, LV_NARROW_LEFT, LV_SPLIT, LV_CLASSIC_LEFT],
-    PL_COMPACT, ['compactMessages', 'denseList', 'stickyHeader'], ICONS_MINIMAL),
+    [LV_COMPACT, LV_MINIMAL, LV_SPLIT, LV_NARROW_LEFT, LV_CLASSIC_LEFT],
+    PL_COMPACT, ['compactMessages', 'denseList', 'stickyHeader'], ICONS_MINIMAL,
+    'neumorphic', 'solid', 'none'),
 
-  p('tropical-sunset', 'Тропики', 'Закат на тропическом острове', '🏝️',
+  // 29 — Tropical Sunset: warm, gradient borders, card layout, bouncing icons
+  p('tropical-sunset', 'Тропики', 'Закат на тропическом острове с градиентными рамками', '🏝️',
     C({ colorTheme: 'orange', bubbleStyle: 'rounded', chatBackground: 'gradient', fontFamily: 'montserrat', borderRadius: 'large' }),
     { '--background': '20 20% 5%', '--card': '20 16% 8%' }, [20, 340, 45],
-    [LV_CLASSIC_LEFT, LV_FLOATING, LV_WIDE_LEFT, LV_CLASSIC_RIGHT, LV_CARD_LEFT],
-    PL_STANDARD, ['roundedPanels', 'glowAccents', 'gradientHeader'], ICONS_STANDARD),
+    [LV_CARD_LEFT, LV_FLOATING, LV_WIDE_LEFT, LV_CLASSIC_RIGHT, LV_CLASSIC_LEFT],
+    PL_STANDARD, ['roundedPanels', 'glowAccents', 'gradientHeader', 'separatedPanels'], ICONS_STANDARD,
+    'gradient-border', 'gradient', 'bounce'),
 
-  p('ice-crystal', 'Кристалл', 'Ледяные кристаллы и иней', '❄️',
+  // 30 — Ice Crystal: cold cyan, frosted glass, floating, spinning icons
+  p('ice-crystal', 'Кристалл', 'Ледяные кристаллы с матовым стеклом и вращающимися иконками', '❄️',
     C({ colorTheme: 'cyan', fontSize: 'medium', bubbleStyle: 'classic', chatBackground: 'stars', fontFamily: 'inter', borderRadius: 'medium', glassEffects: true }),
     { '--background': '195 22% 4%', '--card': '195 18% 7%' }, [195, 185, 205, 220],
-    [LV_CLASSIC_LEFT, LV_FLOATING_NARROW, LV_CLASSIC_RIGHT, LV_NARROW_RIGHT, LV_CARD_RIGHT],
-    PL_STANDARD, ['glowAccents', 'roundedPanels', 'immersiveChat'], ICONS_STANDARD),
+    [LV_FLOATING_NARROW, LV_CARD_RIGHT, LV_CLASSIC_LEFT, LV_CLASSIC_RIGHT, LV_NARROW_RIGHT],
+    PL_STANDARD, ['glowAccents', 'roundedPanels', 'immersiveChat', 'separatedPanels'], ICONS_STANDARD,
+    'frosted', 'solid', 'spin'),
 ];

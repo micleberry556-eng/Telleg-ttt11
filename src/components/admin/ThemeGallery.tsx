@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ArrowLeft, Check, Shuffle, Sparkles, Shield } from 'lucide-react';
+import { ArrowLeft, Check, Shuffle, Sparkles, Shield, Zap, MessageCircle, Send } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   THEME_PRESETS,
@@ -7,6 +7,9 @@ import {
   applyVariationToConfig,
   getVariationCSSOverrides,
   getModifierClasses,
+  getSurfaceClass,
+  getHeaderClass,
+  getIconAnimClass,
   type ThemePreset,
   type LayoutVariant,
   type LayoutModifier,
@@ -20,6 +23,24 @@ interface ThemeGalleryProps {
   onApply: (config: AppearanceConfig, cssOverrides: Record<string, string>, layout?: LayoutVariant, modifiers?: LayoutModifier[]) => void;
 }
 
+/** Translates surface style to a short Russian label. */
+function surfaceLabel(s: string): string {
+  const map: Record<string, string> = {
+    glass: 'стекло', neumorphic: 'объём', 'gradient-border': 'градиент',
+    frosted: 'матовое', 'neon-outline': 'неон', paper: 'бумага', holographic: 'голо',
+  };
+  return map[s] || s;
+}
+
+/** Translates icon animation to a short Russian label. */
+function iconAnimLabel(a: string): string {
+  const map: Record<string, string> = {
+    none: '', pulse: 'пульс', bounce: 'прыжок', spin: 'вращение',
+    wiggle: 'покачивание', glow: 'свечение', float: 'парение', shake: 'тряска',
+  };
+  return map[a] || a;
+}
+
 function PreviewCard({ preset, isActive, onApply, onRandomize }: {
   preset: ThemePreset;
   isActive: boolean;
@@ -29,36 +50,54 @@ function PreviewCard({ preset, isActive, onApply, onRandomize }: {
   const bubbleCls = getBubbleClasses(preset.config.bubbleStyle);
   const fontCls = getFontSizeClass(preset.config.fontSize);
   const bgCls = getBackgroundClass(preset.config.chatBackground);
+  const surfaceCls = getSurfaceClass(preset.surfaceStyle);
+  const iconAnimCls = getIconAnimClass(preset.iconAnimation);
 
   // Compute primary color for preview
   const hue = preset.accentHues[0] || 262;
   const primaryStyle = { backgroundColor: `hsl(${hue}, 80%, 55%)` };
   const otherStyle = { backgroundColor: 'hsl(250, 15%, 15%)' };
 
+  // Layout indicator
+  const layoutName = preset.layoutVariants[0]?.name || '';
+
   return (
     <div className={cn(
-      'glass-card rounded-2xl overflow-hidden transition-all',
+      'rounded-2xl overflow-hidden transition-all',
+      surfaceCls,
       isActive ? 'ring-2 ring-primary' : 'hover:ring-1 hover:ring-muted-foreground/20',
     )}>
-      {/* Mini preview */}
-      <div className={cn('p-3 space-y-1.5 h-28', bgCls)} style={{ background: bgCls ? undefined : `hsl(${preset.cssOverrides['--background'] || '250 25% 5%'})` }}>
-        {/* Other bubble */}
-        <div className="flex justify-start">
-          <div className={cn('px-2.5 py-1 text-[9px] text-white/90 max-w-[70%]', bubbleCls.other, fontCls)} style={otherStyle}>
-            Привет!
+      {/* Mini preview with chat bubbles */}
+      <div className={cn('p-3 space-y-1.5 h-32 relative', bgCls)} style={{ background: bgCls ? undefined : `hsl(${preset.cssOverrides['--background'] || '250 25% 5%'})` }}>
+        {/* Mini header bar */}
+        <div className={cn('absolute top-0 left-0 right-0 h-6 flex items-center px-2 gap-1', getHeaderClass(preset.headerStyle))}>
+          <Zap className={cn('w-2.5 h-2.5 text-white/70', iconAnimCls)} style={{ color: `hsl(${hue}, 80%, 65%)` }} />
+          <span className="text-[8px] text-white/60 truncate">{preset.name}</span>
+        </div>
+
+        {/* Chat bubbles */}
+        <div className="pt-5 space-y-1">
+          <div className="flex justify-start">
+            <div className={cn('px-2 py-0.5 text-[8px] text-white/90 max-w-[65%]', bubbleCls.other, fontCls)} style={otherStyle}>
+              Привет!
+            </div>
+          </div>
+          <div className="flex justify-end">
+            <div className={cn('px-2 py-0.5 text-[8px] text-white max-w-[65%]', bubbleCls.own, fontCls)} style={primaryStyle}>
+              Отлично!
+            </div>
+          </div>
+          <div className="flex justify-start">
+            <div className={cn('px-2 py-0.5 text-[8px] text-white/90 max-w-[65%]', bubbleCls.other, fontCls)} style={otherStyle}>
+              Как дела?
+            </div>
           </div>
         </div>
-        {/* Own bubble */}
-        <div className="flex justify-end">
-          <div className={cn('px-2.5 py-1 text-[9px] text-white max-w-[70%]', bubbleCls.own, fontCls)} style={primaryStyle}>
-            Отлично!
-          </div>
-        </div>
-        {/* Another */}
-        <div className="flex justify-start">
-          <div className={cn('px-2.5 py-1 text-[9px] text-white/90 max-w-[70%]', bubbleCls.other, fontCls)} style={otherStyle}>
-            Как дела?
-          </div>
+
+        {/* Mini floating icons in corner */}
+        <div className="absolute bottom-1.5 right-2 flex gap-1">
+          <MessageCircle className={cn('w-3 h-3 opacity-40', iconAnimCls)} style={{ color: `hsl(${hue}, 70%, 60%)` }} />
+          <Send className={cn('w-3 h-3 opacity-40', iconAnimCls)} style={{ color: `hsl(${hue}, 70%, 60%)` }} />
         </div>
       </div>
 
@@ -69,13 +108,16 @@ function PreviewCard({ preset, isActive, onApply, onRandomize }: {
           <h3 className="text-sm font-semibold text-foreground truncate flex-1">{preset.name}</h3>
           {isActive && <Check className="w-4 h-4 text-primary flex-shrink-0" />}
         </div>
-        <p className="text-[10px] text-muted-foreground mb-2.5 line-clamp-1">{preset.description}</p>
+        <p className="text-[10px] text-muted-foreground mb-2 line-clamp-2">{preset.description}</p>
 
-        {/* Tags */}
+        {/* Tags — show surface, layout, icon animation */}
         <div className="flex flex-wrap gap-1 mb-2.5">
-          <span className="text-[9px] bg-muted px-1.5 py-0.5 rounded-full text-muted-foreground">{preset.config.fontFamily}</span>
-          <span className="text-[9px] bg-muted px-1.5 py-0.5 rounded-full text-muted-foreground">{preset.config.bubbleStyle}</span>
-          {preset.config.glassEffects && <span className="text-[9px] bg-muted px-1.5 py-0.5 rounded-full text-muted-foreground">glass</span>}
+          <span className="text-[8px] bg-muted px-1.5 py-0.5 rounded-full text-muted-foreground">{surfaceLabel(preset.surfaceStyle)}</span>
+          <span className="text-[8px] bg-muted px-1.5 py-0.5 rounded-full text-muted-foreground">{preset.config.fontFamily}</span>
+          {layoutName && <span className="text-[8px] bg-muted px-1.5 py-0.5 rounded-full text-muted-foreground truncate max-w-[80px]">{layoutName}</span>}
+          {preset.iconAnimation !== 'none' && (
+            <span className="text-[8px] bg-primary/10 px-1.5 py-0.5 rounded-full text-primary">{iconAnimLabel(preset.iconAnimation)}</span>
+          )}
         </div>
 
         {/* Actions */}
@@ -147,9 +189,9 @@ export function ThemeGallery({ currentConfig, onBack, onApply }: ThemeGalleryPro
         </button>
         <div className="flex-1 min-w-0">
           <h2 className="text-lg font-bold text-gradient">Шаблоны дизайна</h2>
-          <p className="text-[11px] text-muted-foreground">{THEME_PRESETS.length} шаблонов</p>
+          <p className="text-[11px] text-muted-foreground">{THEME_PRESETS.length} уникальных шаблонов</p>
         </div>
-        <Sparkles className="w-5 h-5 text-primary" />
+        <Sparkles className="w-5 h-5 text-primary icon-anim-float" />
       </div>
 
       {/* Search */}
